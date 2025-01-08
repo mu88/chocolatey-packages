@@ -4,7 +4,7 @@
   <metadata>
     <id>foldersync-desktop</id>
     <version>2.0.3</version>
-    <packageSourceUrl>https://github.com/tacitdynamics/foldersync-desktop-production/tree/master/chocolatey/_auto</packageSourceUrl>
+    <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/foldersync-desktop</packageSourceUrl>
     <title>FolderSync Desktop</title>
     <authors>acarlsen,mu88</authors>
     <projectUrl>https://foldersync.io/desktop</projectUrl>

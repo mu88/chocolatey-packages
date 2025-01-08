@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>foldersync-desktop</id>
+    <version>2.0.3</version>
+    <packageSourceUrl>https://github.com/tacitdynamics/foldersync-desktop-production/tree/master/chocolatey/_auto</packageSourceUrl>
+    <title>FolderSync Desktop</title>
+    <authors>acarlsen,mu88</authors>
+    <projectUrl>https://foldersync.io/desktop</projectUrl>
+    <iconUrl>https://foldersync.io/_next/static/media/logo_foldersync.3f80f62e.png</iconUrl>
+    <copyright>© Copyright 2023 Tacit Dynamics ApS</copyright>
+    <licenseUrl>https://foldersync.io/eula/</licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <tags>backup cloud sync</tags>
+    <summary>Advanced syncing tool for Windows, Linux and MacOS.</summary>
+    <description>With FolderSync, you can easily keep your files up-to-date and accessible, while also protecting your important data from loss or damage.</description>
+    <releaseNotes>https://foldersync.io/desktop/changelog</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

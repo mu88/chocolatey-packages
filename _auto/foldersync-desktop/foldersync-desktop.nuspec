@@ -6,7 +6,7 @@
     <version>2.0.3</version>
     <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/foldersync-desktop</packageSourceUrl>
     <title>FolderSync Desktop</title>
-    <authors>acarlsen,mu88</authors>
+    <authors>acarlsen</authors>
     <projectUrl>https://foldersync.io/desktop</projectUrl>
     <iconUrl>https://foldersync.io/_next/static/media/logo_foldersync.3f80f62e.png</iconUrl>
     <copyright>© Copyright 2023 Tacit Dynamics ApS</copyright>

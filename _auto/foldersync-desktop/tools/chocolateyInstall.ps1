@@ -9,8 +9,7 @@ $checksum     = '1382B247EFB2DCB964500B23804067B94F3BC4CD617557448013A54F0154CDD
 $checksumType = 'SHA256'
 
 # Download installer package and verify checksum
-Get-ChocolateyWebFile -PackageName $packageName -FileFullPath $fileFullPath -Url64bit $url64
-Get-ChecksumValid -File $fileFullPath -CheckSum $checksum -ChecksumType $checksumType
+Get-ChocolateyWebFile -PackageName $packageName -FileFullPath $fileFullPath -Url64bit $url64 -Checksum64 $checksum -ChecksumType64 $checksumType
 
 # Install the package
 Add-AppxPackage -Path $fileFullPath

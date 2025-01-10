@@ -1,0 +1,37 @@
+name: Choco Pack & Push
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        type: choice
+        description: Which Choco package to pack and push?
+        options: 
+        - foldersync-desktop
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  pack_push_choco:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ${{ github.event.inputs.package }} Choco package
+        id: pack
+        run: |
+          Set-Location _auto\${{ github.event.inputs.package }}
+          $UpdateOutput = choco pack
+          $NupkgPath = (($UpdateOutput.Result | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
+          Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
+
+      - name: Publish ${{ github.event.inputs.package }} to Chocolatey community feed
+        run: |
+          Set-Location _auto\${{ github.event.inputs.package }}
+          $Nupkg = '${{ steps.pack.outputs.NupkgPath }}'
+          $ApiKey = '${{ secrets.CHOCO_KEY }}'
+          $ChocoServer = 'https://push.chocolatey.org/'
+          choco push $Nupkg --source $ChocoServer --key $ApiKey

@@ -28,6 +28,14 @@ jobs:
           $NupkgPath = (($UpdateOutput.Result | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
           Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
 
+      - name: Publish ${{ github.event.inputs.package }} to GitHub Packages feed
+        run: |
+          Set-Location _auto\${{ github.event.inputs.package }}
+          $Nupkg = '${{ steps.pack.outputs.NupkgPath }}'
+          $ApiKey = '${{ secrets.GITHUB_TOKEN }}'
+          $ChocoServer = 'https://nuget.pkg.github.com/mu88/index.json'
+          choco push $Nupkg --source $ChocoServer --key $ApiKey
+
       - name: Publish ${{ github.event.inputs.package }} to Chocolatey community feed
         run: |
           Set-Location _auto\${{ github.event.inputs.package }}

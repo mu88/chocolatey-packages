@@ -33,6 +33,7 @@ jobs:
           $UpdateOutput = choco pack
           $NupkgPath = (($UpdateOutput.Result | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
           Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
+          Write-Output $UpdateOutput
 
       - name: Publish ${{ github.event.inputs.package }} to GitHub Packages feed
         run: |

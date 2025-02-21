@@ -4,9 +4,7 @@ function global:au_GetLatest {
     $LatestRelease = Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/tacitdynamics/foldersync-desktop-production/releases/latest"
     $LatestVersion = $LatestRelease.tag_name
 
-    Write-Output 'newversion=$($LatestVersion)' >> $Env:GITHUB_OUTPUT
-
-    @{
+    return @{
         URL64   = $LatestRelease.assets | Where-Object { $_.name.endsWith(".x64.msix") } | Select-Object -ExpandProperty browser_download_url
         Version = $LatestVersion
     }

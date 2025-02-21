@@ -11,9 +11,14 @@ defaults:
 
 jobs:
   update_choco_auto:
-    if: ${{ false }} # not yet ready
     name: update_${{ matrix.package }}
     runs-on: windows-latest
+
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
 
     strategy:
       max-parallel: 1
@@ -25,6 +30,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+
+      - name: Configure GitHub Packages as NuGet source
+        run: dotnet nuget add source --username mu88 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github 'https://nuget.pkg.github.com/mu88/index.json'
+
       - name: Install Chocolatey Automatic Package Updater Module
         run: Install-Module -Name Chocolatey-AU -Force
 
@@ -34,17 +45,28 @@ jobs:
           Set-Location _auto\${{ matrix.package }}
           $UpdateOutput = .\update.ps1
           $NupkgPath = (($UpdateOutput.Result | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
+          $NewVersion = $UpdateOutput.RemoteVersion
           Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
+          Write-Output "NewVersion=$($NewVersion)" >> $Env:GITHUB_OUTPUT
           $UpdateStatus = if ($UpdateOutput.Result -match 'No new version found') {'No Update'} else {'Update Available'}
           Write-Output "UpdateStatus=$($UpdateStatus)" >> $Env:GITHUB_OUTPUT
 
       - name: Test ${{ matrix.package }} install
-        if: steps.update.outputs.UpdateStatus == 'Update Available'
+        if: ${{ false && steps.update.outputs.UpdateStatus == 'Update Available' }} # Skip for now as it is not yet clear how appx packages can be installed
         run: Test-Package -Install -Nu ${{ steps.update.outputs.NupkgPath }}
 
-      - name: Publish to Chocolatey community feed
+      - name: Publish ${{ matrix.package }} to GitHub Packages feed
         if: steps.update.outputs.UpdateStatus == 'Update Available'
         run: |
+          Set-Location _auto\${{ matrix.package }}
+          $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
+          $ApiKey = '${{ secrets.GITHUB_TOKEN }}'
+          dotnet nuget push $Nupkg --api-key $ApiKey --source 'github'
+  
+      - name: Publish ${{ matrix.package }} to Chocolatey community feed
+        if: ${{ false }}
+        run: |
+          Set-Location _auto\${{ matrix.package }}
           $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
           $ApiKey = '${{ secrets.CHOCO_KEY }}'
           $ChocoServer = 'https://push.chocolatey.org/'
@@ -54,5 +76,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         if: steps.update.outputs.UpdateStatus == 'Update Available'
         with:
-          commit_message: "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.newversion }}"
+          commit_message: "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.NewVersion }}"
           file_pattern: '*.nuspec *.ps1'

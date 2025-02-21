@@ -17,18 +17,40 @@ jobs:
   pack_push_choco:
     runs-on: windows-latest
 
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+
+      - name: Configure GitHub Packages as NuGet source
+        run: dotnet nuget add source --username mu88 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github 'https://nuget.pkg.github.com/mu88/index.json'
 
       - name: Build ${{ github.event.inputs.package }} Choco package
         id: pack
         run: |
           Set-Location _auto\${{ github.event.inputs.package }}
           $UpdateOutput = choco pack
-          $NupkgPath = (($UpdateOutput.Result | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
+          $NupkgPath = (($UpdateOutput | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
           Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
+          Write-Output $UpdateOutput
+          Write-Output "NupkgPath=$($NupkgPath)"
+
+      - name: Publish ${{ github.event.inputs.package }} to GitHub Packages feed
+        run: |
+          Set-Location _auto\${{ github.event.inputs.package }}
+          $Nupkg = '${{ steps.pack.outputs.NupkgPath }}'
+          $ApiKey = '${{ secrets.GITHUB_TOKEN }}'
+          dotnet nuget push $Nupkg --api-key $ApiKey --source 'github'
 
       - name: Publish ${{ github.event.inputs.package }} to Chocolatey community feed
+        if: ${{ false }}
         run: |
           Set-Location _auto\${{ github.event.inputs.package }}
           $Nupkg = '${{ steps.pack.outputs.NupkgPath }}'

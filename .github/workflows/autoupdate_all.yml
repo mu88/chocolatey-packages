@@ -72,9 +72,11 @@ jobs:
           $ChocoServer = 'https://push.chocolatey.org/'
           choco push $Nupkg --source $ChocoServer --key $ApiKey
 
-      - name: Commit Updated nuspec
-        uses: stefanzweifel/git-auto-commit-action@v4
-        if: steps.update.outputs.UpdateStatus == 'Update Available'
+      - name: Create Pull Request with updated nuspec
+        uses: peter-evans/create-pull-request@v7
         with:
-          commit_message: "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.NewVersion }}"
-          file_pattern: '*.nuspec *.ps1'
+          sign-commits: true
+          add-paths: |
+            *.nuspec
+            *.ps1
+          commit-message: "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.NewVersion }}"

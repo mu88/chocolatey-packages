@@ -66,7 +66,7 @@ jobs:
           dotnet nuget push $Nupkg --api-key $ApiKey --source 'github'
   
       - name: Publish ${{ matrix.package }} to Chocolatey community feed
-        if: ${{ false }}
+        if: steps.update.outputs.UpdateStatus == 'Update Available'
         run: |
           Set-Location _auto\${{ matrix.package }}
           $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
@@ -76,6 +76,7 @@ jobs:
 
       - name: Create Pull Request with updated nuspec
         uses: peter-evans/create-pull-request@v7
+        if: steps.update.outputs.UpdateStatus == 'Update Available'
         with:
           sign-commits: true
           add-paths: |

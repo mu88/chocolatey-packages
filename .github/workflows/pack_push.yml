@@ -52,7 +52,6 @@ jobs:
           dotnet nuget push $Nupkg --api-key $ApiKey --source 'github'
 
       - name: Publish ${{ github.event.inputs.package }} to Chocolatey community feed
-        if: ${{ false }}
         run: |
           Set-Location _auto\${{ github.event.inputs.package }}
           $Nupkg = '${{ steps.pack.outputs.NupkgPath }}'

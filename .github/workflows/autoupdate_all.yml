@@ -15,10 +15,11 @@ jobs:
     runs-on: windows-latest
 
     permissions:
-      contents: write
-      packages: write
       attestations: write
+      contents: write
       id-token: write
+      packages: write
+      pull-requests: write
 
     strategy:
       max-parallel: 1

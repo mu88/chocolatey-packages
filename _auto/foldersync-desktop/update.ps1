@@ -1,7 +1,11 @@
+Param (
+    [string]$GitHubToken
+)
+
 import-module Chocolatey-AU
 
 function global:au_GetLatest {
-    $LatestRelease = Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/tacitdynamics/foldersync-desktop-production/releases/latest"
+    $LatestRelease = Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/tacitdynamics/foldersync-desktop-production/releases/latest" -Authentication Bearer -Token ($GitHubToken | ConvertTo-SecureString -AsPlainText)
     $LatestVersion = $LatestRelease.tag_name
 
     return @{

@@ -46,7 +46,7 @@ jobs:
         id: update
         run: |
           Set-Location _auto\${{ matrix.package }}
-          $UpdateOutput = .\update.ps1
+          $UpdateOutput = .\update.ps1 -GitHubToken ${{ secrets.GITHUB_TOKEN }}
           $NupkgPath = (($UpdateOutput.Result | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
           $NewVersion = $UpdateOutput.RemoteVersion
           Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT

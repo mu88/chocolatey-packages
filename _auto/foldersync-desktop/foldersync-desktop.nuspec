@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>foldersync-desktop</id>
-    <version>2.4.1</version>
+    <version>2.4.1.1</version>
     <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/foldersync-desktop</packageSourceUrl>
     <title>FolderSync Desktop</title>
     <owners>mu88</owners>

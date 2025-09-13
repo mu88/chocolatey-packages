@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = "Stop"
 
 $packageName  = 'foldersync-desktop'
 $url64        = 'https://github.com/tacitdynamics/foldersync-desktop-production/releases/download/2.6.1/foldersync-desktop-2.6.1.x64.msix'
@@ -15,7 +15,7 @@ Get-ChocolateyWebFile -PackageName $packageName -FileFullPath $fileFullPath -Url
 DISM.EXE /Online /Add-ProvisionedAppxPackage /PackagePath:$fileFullPath /SkipLicense
 
 # On Windows 11 24H2, Microsoft broke all *-AppxPackage commands. As a temporary workaround, we use the GAC to install some required assemblies.
-Add-Type -AssemblyName "System.EnterpriseServices"
+Add-Type -AssemblyName 'System.EnterpriseServices'
 $publish = [System.EnterpriseServices.Internal.Publish]::new()
 @(
     'System.Numerics.Vectors.dll',
@@ -28,5 +28,19 @@ $publish = [System.EnterpriseServices.Internal.Publish]::new()
 }
 
 # Disable package auto updates as otherwise Chocolatey might get confused
-$packageFamilyName = (Get-AppxPackage -AllUsers | Where-Object { $_.Name -eq 'FoldersyncDesktop' }).PackageFamilyName
-Remove-AppxPackageAutoUpdateSettings -PackageFamilyName $packageFamilyName -AllUsers
+$packageFamilyNames = (Get-AppxPackage -AllUsers | Where-Object { $_.Name -eq 'FoldersyncDesktop' }).PackageFamilyName
+foreach ($packageFamilyName in $packageFamilyNames) {
+    if (!$packageFamilyName) {
+        Write-Verbose 'Skipped empty or null PackageFamilyName.'
+        continue
+    }
+
+    try {
+        Remove-AppxPackageAutoUpdateSettings -PackageFamilyName $packageFamilyName -AllUsers
+    } catch {
+        Write-Warning "Failed to disable auto update for package family '$packageFamilyName': $_"
+        if ($_.Exception) {
+            Write-Warning "Exception details: $($_.Exception.Message)"
+        }
+    }
+}

@@ -34,7 +34,7 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 9
+          dotnet-version: 10
 
       - name: Configure GitHub Packages as NuGet source
         run: dotnet nuget add source --username mu88 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github 'https://nuget.pkg.github.com/mu88/index.json'

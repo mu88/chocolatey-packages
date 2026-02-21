@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>token2-companion</id>
+    <version>2.0.2.6</version>
+    <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/token2-companion</packageSourceUrl>
+    <title>Token2 Companion App</title>
+    <owners>mu88</owners>
+    <authors>TOKEN2</authors>
+    <projectUrl>https://www.token2.com</projectUrl>
+    <iconUrl>https://www.token2.com/img/icon/logo-black.png</iconUrl>
+    <copyright>© Copyright 2013 - $([System.DateTime]::Now.ToString(yyyy)) TOKEN2 Sàrl</copyright>
+    <licenseUrl>https://www.token2.com/tos</licenseUrl>
+    <docsUrl>https://www.token2.com/site/page/token2-companion-app-v2-user-manual</docsUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <tags>fido otp passkey security</tags>
+    <summary>The Token2 Companion App v2 is a desktop application for managing OTP (One-Time Password), FIDO, and PIV functionalities.</summary>
+    <description>It allows users to add, manage, and secure authentication tokens, OTP accounts, and FIDO2 keys.</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

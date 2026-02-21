@@ -8,6 +8,7 @@ on:
         description: Which Choco package to pack and push?
         options: 
         - foldersync-desktop
+        - token2-companion
 
 defaults:
   run:

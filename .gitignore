@@ -14,13 +14,15 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
+# Zip files
+*.zip
+
 # =========================
 # Operating System Files
 # =========================
 
 # Icon must ends with two \r.
 Icon
-
 
 # Thumbnails
 ._*

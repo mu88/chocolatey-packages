@@ -1,6 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 import-module Chocolatey-AU
+
 # Page containing download links
 $releases = 'https://www.token2.com/site/page/token2-companion-app-v2-user-manual'
 
@@ -35,14 +36,14 @@ function global:au_GetLatest {
     # Find ALL matching download links
     $regex = '/soft/Token2_Companion_App-(?<version>[\d\._R]+)\.zip'
 
-    $matches = [regex]::Matches($page.Content, $regex)
+    $regexMatches = [regex]::Matches($page.Content, $regex)
 
-    if ($matches.Count -eq 0) {
+    if ($regexMatches.Count -eq 0) {
         throw "No download links found."
     }
 
     # Collect all versions
-    $versions = foreach ($m in $matches) {
+    $versions = foreach ($m in $regexMatches) {
         $raw = $m.Groups['version'].Value
 
         [PSCustomObject]@{
@@ -73,10 +74,12 @@ function global:au_BeforeUpdate {
 }
 
 function global:au_SearchReplace {
+    $year = (Get-Date).Year
 
     @{
         ".\token2-companion.nuspec" = @{
             "(?i)(<version>).*?(</version>)" = "`${1}$($Latest.Version)`${2}"
+            "(?i)(<copyright>).*?(</copyright>)" = "`${1}© Copyright 2013 - $year TOKEN2 Sàrl`${2}"
         }
 
         ".\tools\chocolateyinstall.ps1" = @{

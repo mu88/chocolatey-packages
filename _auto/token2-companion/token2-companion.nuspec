@@ -10,7 +10,7 @@
     <authors>TOKEN2</authors>
     <projectUrl>https://www.token2.com</projectUrl>
     <iconUrl>https://www.token2.com/img/icon/logo-black.png</iconUrl>
-    <copyright>© Copyright 2013 - $([System.DateTime]::Now.ToString(yyyy)) TOKEN2 Sàrl</copyright>
+    <copyright>© Copyright 2013 - 2026 TOKEN2 Sàrl</copyright>
     <licenseUrl>https://www.token2.com/tos</licenseUrl>
     <docsUrl>https://www.token2.com/site/page/token2-companion-app-v2-user-manual</docsUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>

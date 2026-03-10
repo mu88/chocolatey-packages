@@ -6,8 +6,9 @@ on:
       package:
         type: choice
         description: Which Choco package to pack and push?
-        options: 
+        options:
         - foldersync-desktop
+        - github-copilot-cli
         - token2-companion
 
 defaults:

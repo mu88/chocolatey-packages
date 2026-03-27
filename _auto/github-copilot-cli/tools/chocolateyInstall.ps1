@@ -1,17 +1,30 @@
 ﻿$ErrorActionPreference = "Stop"
 
 $packageName = 'github-copilot-cli'
-$url64       = 'https://github.com/github/copilot-cli/releases/download/v1.0.2/copilot-x64.msi'
+$toolsDir    = Get-ToolsLocation
+$installDir  = Join-Path $toolsDir 'GitHubCopilotCLI'
+$url64       = 'https://github.com/github/copilot-cli/releases/download/v1.0.2/copilot-win32-x64.zip'
 
 $packageArgs = @{
   packageName    = $packageName
-  fileType       = 'msi'
+  unzipLocation  = $installDir
   url64bit       = $url64
-  silentArgs     = "/qn /norestart"
-  validExitCodes = @(0)
-  softwareName   = 'GitHub Copilot CLI*'
-  checksum64     = '1f24d0f5a1f3b7c4856e2b0b3cf6370cd19b5ef51c63b37e4c71eb70806face3'
+  checksum64     = '14f7e639721861ad49519863aad154925ed442b653dc3306efd68e6383b03ca8'
   checksumType64 = 'sha256'
 }
 
-Install-ChocolateyPackage @packageArgs
+if (Test-Path $installDir) {
+  Remove-Item $installDir -Recurse -Force
+}
+
+Install-ChocolateyZipPackage @packageArgs
+
+$copilotExe = Get-ChildItem -Path $installDir -Filter 'copilot.exe' -Recurse -File |
+  Select-Object -First 1 -ExpandProperty FullName
+
+if (-not $copilotExe) {
+  throw "copilot.exe was not found after extracting '$url64' to '$installDir'."
+}
+
+Uninstall-BinFile -Name 'copilot' -ErrorAction SilentlyContinue
+Install-BinFile -Name 'copilot' -Path $copilotExe

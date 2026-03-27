@@ -9,7 +9,7 @@ function global:au_GetLatest {
     $LatestVersion = $LatestRelease.tag_name
 
     return @{
-        URL64   = $LatestRelease.assets | Where-Object { $_.name.endsWith("-x64.msi") } | Select-Object -ExpandProperty browser_download_url
+        URL64   = $LatestRelease.assets | Where-Object { $_.name -eq "copilot-win32-x64.zip" } | Select-Object -ExpandProperty browser_download_url
         Version = if ($LatestVersion.StartsWith("v")) {$LatestVersion.Substring(1) } else { $LatestVersion }
     }
 }
@@ -25,8 +25,8 @@ function global:au_SearchReplace {
 
         '.\tools\chocolateyInstall.ps1' = @{
             "(?i)(^\s*(\$)url64\s*=\s*)('.*')"        = "`$1'$($Latest.URL64)'"
-            "(?i)(^\s*(\$)checksum\s*=\s*)('.*')"     = "`$1'$($Latest.Checksum64)'"
-            "(?i)(^\s*(\$)checksumType\s*=\s*)('.*')" = "`$1'$($Latest.ChecksumType64)'"
+            "(?i)(^\s*(\$)checksum64\s*=\s*)('.*')"     = "`$1'$($Latest.Checksum64)'"
+            "(?i)(^\s*(\$)checksumType64\s*=\s*)('.*')" = "`$1'$($Latest.ChecksumType64)'"
         }
     }
 }

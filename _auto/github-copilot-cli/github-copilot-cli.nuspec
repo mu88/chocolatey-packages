@@ -16,7 +16,7 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>github copilot cli command-line interface</tags>
     <summary>The GitHub Copilot CLI is a command-line interface for interacting with GitHub Copilot.</summary>
-    <description>It allows users to access GitHub Copilot features directly from the command line.</description>
+    <description>It allows users to access GitHub Copilot features directly from the command line. The Chocolatey package installs the official Windows ZIP and exposes the copilot command for all users via the Chocolatey shim.</description>
     <releaseNotes>https://github.com/github/copilot-cli/blob/main/changelog.md</releaseNotes>
   </metadata>
   <files>

@@ -9,6 +9,7 @@ on:
         options:
         - foldersync-desktop
         - github-copilot-cli
+        - px-proxy
         - token2-companion
 
 defaults:

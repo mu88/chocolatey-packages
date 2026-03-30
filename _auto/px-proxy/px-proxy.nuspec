@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>px-proxy</id>
+    <version>0.10.3</version>
+    <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/px-proxy</packageSourceUrl>
+    <title>Px Proxy</title>
+    <owners>mu88</owners>
+    <authors>genotrance</authors>
+    <projectUrl>https://github.com/genotrance/px</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/genotrance/px/master/px.ico</iconUrl>
+    <licenseUrl>https://github.com/genotrance/px/blob/master/LICENSE.txt</licenseUrl>
+    <docsUrl>https://github.com/genotrance/px/blob/master/docs/configuration.md</docsUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>proxy http https pac ntlm command-line</tags>
+    <summary>Px is a local proxy server to authenticate through an NTLM proxy.</summary>
+    <description>Installs Px Proxy from the official GitHub release and exposes the px command through a Chocolatey shim.
+
+Package parameters:
+- /SystemWide: Installs files into Program Files instead of the Chocolatey tools location.
+- /Startup: Creates one scheduled task to launch Px automatically at system startup.
+
+Px can also be configured via environment variables, see the official Px configuration documentation. For startup tasks running as SYSTEM, machine-level configuration should be used.</description>
+    <releaseNotes>https://github.com/genotrance/px/releases</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

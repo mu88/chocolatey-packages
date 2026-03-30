@@ -8,7 +8,8 @@
     <owners>mu88</owners>
     <authors>genotrance</authors>
     <projectUrl>https://github.com/genotrance/px</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/genotrance/px/master/px.ico</iconUrl>
+    <icon>px-proxy.png</icon>
+    <iconUrl>https://raw.githubusercontent.com/mu88/chocolatey-packages/main/_auto/px-proxy/px-proxy.png</iconUrl>
     <licenseUrl>https://github.com/genotrance/px/blob/master/LICENSE.txt</licenseUrl>
     <docsUrl>https://github.com/genotrance/px/blob/master/docs/configuration.md</docsUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -24,6 +25,7 @@ Px can also be configured via environment variables, see the official Px configu
     <releaseNotes>https://github.com/genotrance/px/releases</releaseNotes>
   </metadata>
   <files>
+    <file src="px-proxy.png" target="" />
     <file src="tools\**" target="tools" />
   </files>
 </package>

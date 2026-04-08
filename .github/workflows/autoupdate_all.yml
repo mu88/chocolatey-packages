@@ -24,11 +24,13 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        package: [
-          foldersync-desktop,
-          github-copilot-cli,
-          token2-companion
-        ]
+        include:
+          - package: foldersync-desktop
+            testable: false
+          - package: token2-companion
+            testable: true
+          - package: github-copilot-cli
+            testable: true
 
     steps:
       - uses: actions/checkout@v6
@@ -56,9 +58,20 @@ jobs:
           $UpdateStatus = if ($UpdateOutput.Result -match 'No new version found') {'No Update'} else {'Update Available'}
           Write-Output "UpdateStatus=$($UpdateStatus)" >> $Env:GITHUB_OUTPUT
 
+      - name: Pack ${{ matrix.package }} for testing (manual trigger only)
+        id: pack_for_test
+        if: ${{ github.event_name == 'workflow_dispatch' && matrix.testable && steps.update.outputs.NupkgPath == '' }}
+        run: |
+          Set-Location _auto\${{ matrix.package }}
+          $PackOutput = choco pack
+          $NupkgPath = (($PackOutput | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
+          Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
+
       - name: Test ${{ matrix.package }} install
-        if: ${{ false && steps.update.outputs.UpdateStatus == 'Update Available' }} # Skip for now as it is not yet clear how appx packages can be installed
-        run: Test-Package -Install -Nu ${{ steps.update.outputs.NupkgPath }}
+        if: ${{ matrix.testable && (steps.update.outputs.NupkgPath != '' || steps.pack_for_test.conclusion == 'success') }}
+        run: |
+          $NupkgPath = if ('${{ steps.update.outputs.NupkgPath }}') { '${{ steps.update.outputs.NupkgPath }}' } else { '${{ steps.pack_for_test.outputs.NupkgPath }}' }
+          Test-Package -Install -Nu $NupkgPath
 
       - name: Publish ${{ matrix.package }} to GitHub Packages feed
         if: steps.update.outputs.UpdateStatus == 'Update Available'

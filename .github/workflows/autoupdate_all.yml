@@ -101,10 +101,16 @@ jobs:
 
       - name: Commit and push changes
         if: steps.update.outputs.UpdateStatus == 'Update Available'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          $Branch = "chore/update-${{ matrix.package }}-v${{ steps.update.outputs.NewVersion }}"
+          git checkout -b $Branch
           git commit -a -m "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.NewVersion }}"
+          git push origin $Branch
 
-          git push
+          gh pr create --title "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.NewVersion }}" --body "" --base main --head $Branch
+          gh pr merge --squash --admin --delete-branch

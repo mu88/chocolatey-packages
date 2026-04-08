@@ -79,7 +79,7 @@ jobs:
           Set-Location _auto\${{ matrix.package }}
           $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
           $ApiKey = '${{ secrets.GITHUB_TOKEN }}'
-          dotnet nuget push $Nupkg --api-key $ApiKey --source 'github'
+          dotnet nuget push $Nupkg --api-key $ApiKey --source 'github' --skip-duplicate
   
       - name: Publish ${{ matrix.package }} to Chocolatey community feed
         if: steps.update.outputs.UpdateStatus == 'Update Available'
@@ -88,7 +88,16 @@ jobs:
           $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
           $ApiKey = '${{ secrets.CHOCO_KEY }}'
           $ChocoServer = 'https://push.chocolatey.org/'
-          choco push $Nupkg --source $ChocoServer --key $ApiKey
+          $PSNativeCommandUseErrorActionPreference = $false
+          $Output = choco push $Nupkg --source $ChocoServer --key $ApiKey 2>&1
+          Write-Output $Output
+          if ($LASTEXITCODE -ne 0) {
+            if (($Output -join ' ') -match 'already exists') {
+              Write-Warning 'Package already exists in the Chocolatey feed, skipping.'
+            } else {
+              throw "choco push failed with exit code $LASTEXITCODE"
+            }
+          }
 
       - name: Commit and push changes
         if: steps.update.outputs.UpdateStatus == 'Update Available'

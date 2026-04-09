@@ -4,13 +4,46 @@ on:
   schedule:
     - cron:  '0 0 * * *'
   workflow_dispatch:
+    inputs:
+      package:
+        type: choice
+        description: Which package to update? (all = run full matrix)
+        default: all
+        options:
+          - all
+          - foldersync-desktop
+          - token2-companion
+          - github-copilot-cli
 
 defaults:
   run:
     shell: pwsh
 
 jobs:
+  get_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - name: Build filtered matrix
+        id: set
+        run: |
+          $all = @(
+            @{ package = 'foldersync-desktop'; testable = $false }
+            @{ package = 'token2-companion';   testable = $true  }
+            @{ package = 'github-copilot-cli'; testable = $true  }
+          )
+          $inputPackage = if ('${{ github.event_name }}' -eq 'workflow_dispatch') { '${{ inputs.package }}' } else { 'all' }
+          $filtered = if (-not $inputPackage -or $inputPackage -eq 'all') {
+            $all
+          } else {
+            $all | Where-Object { $_.package -eq $inputPackage }
+          }
+          $matrix = [ordered]@{ include = @($filtered) } | ConvertTo-Json -Compress
+          "matrix=$matrix" >> $Env:GITHUB_OUTPUT
+
   update_choco_auto:
+    needs: get_matrix
     name: update_${{ matrix.package }}
     runs-on: windows-latest
 
@@ -22,15 +55,7 @@ jobs:
       pull-requests: write
 
     strategy:
-      max-parallel: 1
-      matrix:
-        include:
-          - package: foldersync-desktop
-            testable: false
-          - package: token2-companion
-            testable: true
-          - package: github-copilot-cli
-            testable: true
+      matrix: ${{ fromJson(needs.get_matrix.outputs.matrix) }}
 
     steps:
       - uses: actions/checkout@v6
@@ -53,14 +78,33 @@ jobs:
           $UpdateOutput = .\update.ps1 -GitHubToken ${{ secrets.GITHUB_TOKEN }}
           $NupkgPath = (($UpdateOutput.Result | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
           $NewVersion = $UpdateOutput.RemoteVersion
+
+          if ($NupkgPath) {
+            $UpdateStatus = 'Update Available'
+          } elseif ($UpdateOutput.Result -match 'already exists in the Chocolatey community feed') {
+            # AU aborts early when the remote version already exists in the Chocolatey community feed,
+            # leaving local nuspec/install files unpatched. To bring the repo back in sync we must
+            # re-run with a fake gallery URL so AU's feed-existence check throws and is swallowed,
+            # allowing AU to apply au_SearchReplace and patch the nuspec/install files.
+            # We then commit the patched files but intentionally skip all feed pushes
+            # (the version is already published there).
+            $env:au_GalleryPackageRootUrl = 'https://localhost'
+            $UpdateOutput = .\update.ps1 -GitHubToken ${{ secrets.GITHUB_TOKEN }}
+            Remove-Item Env:\au_GalleryPackageRootUrl
+            $NupkgPath = (($UpdateOutput.Result | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
+            $NewVersion = $UpdateOutput.RemoteVersion
+            $UpdateStatus = 'Sync Nuspec'
+          } else {
+            $UpdateStatus = 'No Update'
+          }
+
           Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
           Write-Output "NewVersion=$($NewVersion)" >> $Env:GITHUB_OUTPUT
-          $UpdateStatus = if ($UpdateOutput.Result -match 'No new version found') {'No Update'} else {'Update Available'}
           Write-Output "UpdateStatus=$($UpdateStatus)" >> $Env:GITHUB_OUTPUT
 
       - name: Pack ${{ matrix.package }} for testing (manual trigger only)
         id: pack_for_test
-        if: ${{ github.event_name == 'workflow_dispatch' && matrix.testable && steps.update.outputs.NupkgPath == '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && matrix.testable && steps.update.outputs.UpdateStatus == 'Update Available' && steps.update.outputs.NupkgPath == '' }}
         run: |
           Set-Location _auto\${{ matrix.package }}
           $PackOutput = choco pack
@@ -74,7 +118,9 @@ jobs:
           Test-Package -Install -Nu $NupkgPath
 
       - name: Publish ${{ matrix.package }} to GitHub Packages feed
-        if: steps.update.outputs.UpdateStatus == 'Update Available'
+        if: steps.update.outputs.UpdateStatus == 'Update Available' && github.ref == 'refs/heads/${{ github.event.repository.default_branch }}'
+        # Skipped for 'Sync Nuspec' - version already exists in the feed
+        # Skipped on non-main branches as a safety net
         run: |
           Set-Location _auto\${{ matrix.package }}
           $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
@@ -82,7 +128,9 @@ jobs:
           dotnet nuget push $Nupkg --api-key $ApiKey --source 'github' --skip-duplicate
   
       - name: Publish ${{ matrix.package }} to Chocolatey community feed
-        if: steps.update.outputs.UpdateStatus == 'Update Available'
+        if: steps.update.outputs.UpdateStatus == 'Update Available' && github.ref == 'refs/heads/${{ github.event.repository.default_branch }}'
+        # Skipped for 'Sync Nuspec' - version already exists in the feed
+        # Skipped on non-main branches as a safety net
         run: |
           Set-Location _auto\${{ matrix.package }}
           $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
@@ -100,7 +148,7 @@ jobs:
           }
 
       - name: Commit and push changes
-        if: steps.update.outputs.UpdateStatus == 'Update Available'
+        if: steps.update.outputs.UpdateStatus == 'Update Available' || steps.update.outputs.UpdateStatus == 'Sync Nuspec'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

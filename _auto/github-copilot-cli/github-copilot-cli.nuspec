@@ -3,13 +3,13 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>github-copilot-cli</id>
-    <version>1.0.2</version>
+    <version>1.0.21</version>
     <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/github-copilot-cli</packageSourceUrl>
     <title>GitHub Copilot CLI</title>
     <owners>mu88</owners>
     <authors>GitHub</authors>
     <projectUrl>https://github.com/features/copilot/cli</projectUrl>
-    <copyright>© Copyright 2025 GitHub, Inc.</copyright>
+    <copyright>© Copyright 2026 GitHub, Inc.</copyright>
     <iconUrl>https://github.githubassets.com/images/modules/site/copilot/copilot.png</iconUrl>
     <licenseUrl>https://github.com/github/copilot-cli/blob/main/LICENSE.md</licenseUrl>
     <docsUrl>https://docs.github.com/copilot/concepts/agents/about-copilot-cli</docsUrl>

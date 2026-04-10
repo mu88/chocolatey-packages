@@ -55,7 +55,15 @@ if ($enableStartup) {
 
     $startupTrigger = New-ScheduledTaskTrigger -AtStartup
     $startupPrincipal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount
+    $taskSettings = New-ScheduledTaskSettingsSet `
+        -DisallowStartIfOnBatteries $false `
+        -StopIfGoingOnBatteries $false `
+        -ExecutionTimeLimit (New-TimeSpan -Seconds 0) `
+        -StartWhenAvailable $true `
+        -MultipleInstances IgnoreNew `
+        -RestartCount 3 `
+        -RestartInterval (New-TimeSpan -Minutes 1)
 
     $taskAction = New-ScheduledTaskAction -Execute $pxExe
-    Register-ScheduledTask -TaskName $mainTaskName -Action $taskAction -Trigger $startupTrigger -Principal $startupPrincipal -Force | Out-Null
+    Register-ScheduledTask -TaskName $mainTaskName -Action $taskAction -Trigger $startupTrigger -Principal $startupPrincipal -Settings $taskSettings -Force | Out-Null
 }

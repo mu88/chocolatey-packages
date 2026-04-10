@@ -19,9 +19,10 @@
 
 Package parameters:
 - /SystemWide: Installs files into Program Files instead of the Chocolatey tools location.
-- /Startup: Creates one scheduled task to launch Px automatically at system startup.
+- /Startup: Creates a scheduled task to launch Px automatically at user logon, running in the user's security context so that NTLM proxy authentication uses the correct user credentials.
+- /User:DOMAIN\username: The user account for which the logon task is created. Defaults to the user running the installation. Useful when an admin installs the package on behalf of another user.
 
-Px can also be configured via environment variables, see the official Px configuration documentation. For startup tasks running as SYSTEM, machine-level configuration should be used.</description>
+Px can also be configured via environment variables, see the official Px configuration documentation.</description>
     <releaseNotes>https://github.com/genotrance/px/releases</releaseNotes>
   </metadata>
   <files>

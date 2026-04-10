@@ -8,6 +8,7 @@ $checksumType64 = 'sha256'
 $packageParameters = Get-PackageParameters
 $installSystemWide = $false
 $enableStartup = $false
+$startupUser = "$env:USERDOMAIN\$env:USERNAME"
 
 if ($packageParameters.ContainsKey('SystemWide')) {
     $installSystemWide = $true
@@ -15,6 +16,10 @@ if ($packageParameters.ContainsKey('SystemWide')) {
 
 if ($packageParameters.ContainsKey('Startup')) {
     $enableStartup = $true
+}
+
+if ($packageParameters.ContainsKey('User')) {
+    $startupUser = $packageParameters['User']
 }
 
 $toolsLocation = Get-ToolsLocation
@@ -42,7 +47,15 @@ if (-not $pxExe) {
     throw "px.exe was not found after extracting '$url64' to '$installDir'."
 }
 
-Uninstall-BinFile -Name 'px' -ErrorAction SilentlyContinue
+$pxwExe = Join-Path (Split-Path $pxExe) 'pxw.exe'
+
+$shimDir = Join-Path $env:ChocolateyInstall 'bin'
+foreach ($shimFile in @('px.exe', 'px.exe.ignore')) {
+    $shimPath = Join-Path $shimDir $shimFile
+    if (Test-Path $shimPath) {
+        Remove-Item -Path $shimPath -Force -ErrorAction SilentlyContinue
+    }
+}
 Install-BinFile -Name 'px' -Path $pxExe
 
 if ($enableStartup) {
@@ -53,17 +66,17 @@ if ($enableStartup) {
         Unregister-ScheduledTask -TaskName $mainTaskName -Confirm:$false -ErrorAction SilentlyContinue
     }
 
-    $startupTrigger = New-ScheduledTaskTrigger -AtStartup
-    $startupPrincipal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount
+    $startupTrigger = New-ScheduledTaskTrigger -AtLogOn -User $startupUser
+    $startupPrincipal = New-ScheduledTaskPrincipal -UserId $startupUser -LogonType Interactive -RunLevel Limited
     $taskSettings = New-ScheduledTaskSettingsSet `
-        -DisallowStartIfOnBatteries $false `
-        -StopIfGoingOnBatteries $false `
+        -AllowStartIfOnBatteries `
+        -DontStopIfGoingOnBatteries `
         -ExecutionTimeLimit (New-TimeSpan -Seconds 0) `
-        -StartWhenAvailable $true `
+        -StartWhenAvailable `
         -MultipleInstances IgnoreNew `
         -RestartCount 3 `
         -RestartInterval (New-TimeSpan -Minutes 1)
 
-    $taskAction = New-ScheduledTaskAction -Execute $pxExe
+    $taskAction = New-ScheduledTaskAction -Execute $pxwExe
     Register-ScheduledTask -TaskName $mainTaskName -Action $taskAction -Trigger $startupTrigger -Principal $startupPrincipal -Settings $taskSettings -Force | Out-Null
 }

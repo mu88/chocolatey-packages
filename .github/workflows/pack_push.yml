@@ -11,10 +11,6 @@ on:
         - github-copilot-cli
         - px-proxy
         - token2-companion
-      force:
-        type: boolean
-        description: Force push even if the version already exists in the feeds?
-        default: false
 
 defaults:
   run:
@@ -64,12 +60,11 @@ jobs:
           $Nupkg = '${{ steps.pack.outputs.NupkgPath }}'
           $ApiKey = '${{ secrets.CHOCO_KEY }}'
           $ChocoServer = 'https://push.chocolatey.org/'
-          $Force = '${{ github.event.inputs.force }}' -eq 'true'
           $PSNativeCommandUseErrorActionPreference = $false
           $Output = choco push $Nupkg --source $ChocoServer --key $ApiKey 2>&1
           Write-Output $Output
           if ($LASTEXITCODE -ne 0) {
-            if (-not $Force -and ($Output -join ' ') -match 'already exists') {
+            if (($Output -join ' ') -match 'already exists') {
               Write-Warning 'Package already exists in the Chocolatey feed, skipping.'
             } else {
               throw "choco push failed with exit code $LASTEXITCODE"

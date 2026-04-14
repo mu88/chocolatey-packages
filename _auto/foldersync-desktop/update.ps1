@@ -21,6 +21,10 @@ function global:au_SearchReplace {
             "(?i)(^\s*(\$)checksum\s*=\s*)('.*')"     = "`$1'$($Latest.Checksum64)'"
             "(?i)(^\s*(\$)checksumType\s*=\s*)('.*')" = "`$1'$($Latest.ChecksumType64)'"
         }
+
+        '..\..\README.md' = @{
+            "(?i)(foldersync-desktop.*?Chocolatey-)(\d+\.\d+\.\d+)(-green)" = "`${1}$($Latest.Version)`${3}"
+        }
     }
 }
 

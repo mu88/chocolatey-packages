@@ -78,7 +78,7 @@ function global:au_SearchReplace {
 
     @{
         ".\token2-companion.nuspec" = @{
-            "(?i)(<version>).*?(</version>)" = "`${1}$($Latest.Version)`${2}"
+            "(?i)(<version>).*?(</version>)"     = "`${1}$($Latest.Version)`${2}"
             "(?i)(<copyright>).*?(</copyright>)" = "`${1}© Copyright 2013 - $year TOKEN2 Sàrl`${2}"
         }
 
@@ -86,6 +86,9 @@ function global:au_SearchReplace {
             "(?i)(^\s*\`$url\s*=\s*)'.*'"          = "`$1'$($Latest.URL32)'"
             "(?i)(^\s*\`$checksum\s*=\s*)'.*'"     = "`$1'$($Latest.Checksum32)'"
             "(?i)(^\s*\`$checksumType\s*=\s*)'.*'" = "`$1'$($Latest.ChecksumType32)'"
+        }
+        '..\..\README.md' = @{
+            "(?i)(token2-companion.*?Chocolatey-)([\d\.]+)(-green)" = "`${1}$($Latest.Version)`${3}"
         }
     }
 }

@@ -5,6 +5,9 @@ $programFilesInstallDir = Join-Path $env:ProgramFiles 'PxProxy'
 $chocoInstallDir = if ($env:ChocolateyInstall) { $env:ChocolateyInstall } else { Join-Path $env:ProgramData 'chocolatey' }
 $shimDir = Join-Path $chocoInstallDir 'bin'
 
+# Remove the shim entry created by Install-BinFile
+Uninstall-BinFile -Name 'px'
+
 foreach ($shimFileName in @('px.exe', 'px.exe.ignore')) {
     $shimPath = Join-Path $shimDir $shimFileName
     if (Test-Path $shimPath) {

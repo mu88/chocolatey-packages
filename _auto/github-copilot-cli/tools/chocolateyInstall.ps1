@@ -3,8 +3,8 @@
 $packageName   = 'github-copilot-cli'
 $toolsDir      = Get-ToolsLocation
 $installDir    = Join-Path $toolsDir 'GitHubCopilotCLI'
-$url64         = 'https://github.com/github/copilot-cli/releases/download/v1.0.24/copilot-win32-x64.zip'
-$checksum64    = '6bc487d1b2f1a6ac6f35fd4086d1cfd3df59c7b3835618aa6503a0725452904e'
+$url64         = 'https://github.com/github/copilot-cli/releases/download/v1.0.25/copilot-win32-x64.zip'
+$checksum64    = '1f0f8001e251a79cdf453d379d98e5aabce53f7614a42134abf3194e4dd5ab23'
 $checksumType64 = 'sha256'
 
 $packageArgs = @{

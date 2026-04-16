@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>github-copilot-cli</id>
-    <version>1.0.26</version>
+    <version>1.0.28</version>
     <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/github-copilot-cli</packageSourceUrl>
     <title>GitHub Copilot CLI</title>
     <owners>mu88</owners>

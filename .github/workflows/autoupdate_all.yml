@@ -150,24 +150,25 @@ jobs:
             }
           }
 
+      - name: Get bot user identity
+        uses: mu88/common/.github/actions/get-bot-identity@22e167e9c593b61161fc3e00f045c5eb8a8cbaa2
+        id: bot-identity
+        with:
+          client-id: ${{ vars.MU88_BOT_APP_ID }}
+          private-key: ${{ secrets.MU88_BOT_APP_PRIVATE_KEY }}
+
       - name: Commit and push changes
         if: steps.update.outputs.UpdateStatus == 'Update Available' || steps.update.outputs.UpdateStatus == 'Sync Nuspec'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.bot-identity.outputs.token }}
         run: |
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "${{ steps.bot-identity.outputs.name }}"
+          git config --local user.email "${{ steps.bot-identity.outputs.email }}"
 
           if (-not (git status --porcelain)) {
-            Write-Warning 'Nothing to commit - nuspec is already up to date. Skipping PR.'
+            Write-Warning 'Nothing to commit - nuspec is already up to date. Skipping push.'
             exit 0
           }
 
-          $DefaultBranch = '${{ github.event.repository.default_branch }}'
-          $Branch = "chore/update-${{ matrix.package }}-v${{ steps.update.outputs.NewVersion }}"
-          git checkout -b $Branch
           git commit -a -m "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.NewVersion }}"
-          git push origin $Branch --force-with-lease
-
-          gh pr create --title "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.NewVersion }}" --body "" --base $DefaultBranch --head $Branch
-          gh pr merge --squash --admin --delete-branch
+          git push origin main

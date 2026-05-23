@@ -11,9 +11,10 @@ on:
         default: all
         options:
           - all
-          - foldersync-desktop
-          - token2-companion
           - github-copilot-cli
+          - foldersync-desktop
+          - px-proxy
+          - token2-companion
 
 defaults:
   run:
@@ -29,9 +30,10 @@ jobs:
         id: set
         run: |
           $all = @(
-            @{ package = 'foldersync-desktop'; testable = $false }
-            @{ package = 'token2-companion';   testable = $true  }
             @{ package = 'github-copilot-cli'; testable = $true  }
+            @{ package = 'foldersync-desktop'; testable = $false }
+            @{ package = 'px-proxy'; testable = $true  }
+            @{ package = 'token2-companion';   testable = $true  }
           )
           $inputPackage = if ('${{ github.event_name }}' -eq 'workflow_dispatch') { '${{ inputs.package }}' } else { 'all' }
           $filtered = if (-not $inputPackage -or $inputPackage -eq 'all') {

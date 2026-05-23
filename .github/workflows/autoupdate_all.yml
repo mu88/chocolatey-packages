@@ -153,7 +153,7 @@ jobs:
           }
 
       - name: Get bot user identity
-        uses: mu88/common/.github/actions/get-bot-identity@22e167e9c593b61161fc3e00f045c5eb8a8cbaa2
+        uses: mu88/common/.github/actions/get-bot-identity@3acb6a732366cfadf93cd1a029a2ae590d6a4f16
         id: bot-identity
         with:
           client-id: ${{ vars.MU88_BOT_APP_ID }}

@@ -175,4 +175,5 @@ jobs:
           }
 
           git commit -a -m "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.NewVersion }}"
-          git push origin main
+          git pull --rebase origin ${{ github.event.repository.default_branch }}
+          git push origin ${{ github.event.repository.default_branch }}

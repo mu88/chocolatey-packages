@@ -61,7 +61,16 @@ jobs:
       matrix: ${{ fromJson(needs.get_matrix.outputs.matrix) }}
 
     steps:
+      - name: Get bot user identity
+        uses: mu88/common/.github/actions/get-bot-identity@3acb6a732366cfadf93cd1a029a2ae590d6a4f16
+        id: bot-identity
+        with:
+          client-id: ${{ vars.MU88_BOT_APP_ID }}
+          private-key: ${{ secrets.MU88_BOT_APP_PRIVATE_KEY }}
+
       - uses: actions/checkout@v6
+        with:
+          token: ${{ steps.bot-identity.outputs.token }}
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
@@ -151,13 +160,6 @@ jobs:
               throw "choco push failed with exit code $LASTEXITCODE"
             }
           }
-
-      - name: Get bot user identity
-        uses: mu88/common/.github/actions/get-bot-identity@3acb6a732366cfadf93cd1a029a2ae590d6a4f16
-        id: bot-identity
-        with:
-          client-id: ${{ vars.MU88_BOT_APP_ID }}
-          private-key: ${{ secrets.MU88_BOT_APP_PRIVATE_KEY }}
 
       - name: Commit and push changes
         if: steps.update.outputs.UpdateStatus == 'Update Available' || steps.update.outputs.UpdateStatus == 'Sync Nuspec'

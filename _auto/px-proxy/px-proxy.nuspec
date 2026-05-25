@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>px-proxy</id>
-    <version>0.10.3</version>
+    <version>0.11.0</version>
     <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/px-proxy</packageSourceUrl>
     <title>Px Proxy</title>
     <owners>mu88</owners>

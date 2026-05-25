@@ -1,8 +1,8 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $packageName = 'px-proxy'
-$url64 = 'https://github.com/genotrance/px/releases/download/v0.10.3/px-v0.10.3-windows-amd64.zip'
-$checksum64 = '444c591d5847c653870f55d2cf14c773e9a750cf10df4d0beda1a488850ba63d'
+$url64 = 'https://github.com/genotrance/px/releases/download/v0.11.0/px-v0.11.0-windows-amd64.zip'
+$checksum64 = '4e69f56f5bad9878190a5e82b5ea18857d15ef34a04256a624a40b4458e96417'
 $checksumType64 = 'sha256'
 
 $packageParameters = Get-PackageParameters

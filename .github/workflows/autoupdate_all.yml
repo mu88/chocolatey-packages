@@ -20,6 +20,10 @@ defaults:
   run:
     shell: pwsh
 
+concurrency:
+  group: choco-auto-update-${{ github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
   get_matrix:
     runs-on: ubuntu-latest
@@ -58,6 +62,7 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix: ${{ fromJson(needs.get_matrix.outputs.matrix) }}
 
     steps:
@@ -163,8 +168,6 @@ jobs:
 
       - name: Commit and push changes
         if: steps.update.outputs.UpdateStatus == 'Update Available' || steps.update.outputs.UpdateStatus == 'Sync Nuspec'
-        env:
-          GH_TOKEN: ${{ steps.bot-identity.outputs.token }}
         run: |
           git config --local user.name "${{ steps.bot-identity.outputs.name }}"
           git config --local user.email "${{ steps.bot-identity.outputs.email }}"
@@ -174,7 +177,5 @@ jobs:
             exit 0
           }
 
-          git fetch origin
-          git merge origin/${{ github.event.repository.default_branch }}
           git commit -a -m "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.NewVersion }}"
           git push origin ${{ github.event.repository.default_branch }}

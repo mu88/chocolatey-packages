@@ -1,11 +1,11 @@
 ﻿$ErrorActionPreference = "Stop"
 
 $packageName  = 'foldersync-desktop'
-$url64        = 'https://github.com/tacitdynamics/foldersync-desktop-production/releases/download/2.9.1/foldersync-desktop-2.9.1.x64.msix'
+$url64        = 'https://github.com/tacitdynamics/foldersync-desktop-production/releases/download/2.9.2/foldersync-desktop-2.9.2.x64.msix'
 $toolsDir     = $(Split-Path -parent $MyInvocation.MyCommand.Definition)
 $fileName     = Split-Path -Path $url64 -Leaf
 $fileFullPath = Join-Path $toolsDir $fileName
-$checksum     = '0d32b6483ba123e48d33aaecd9ccd89ff4100a7aaf0937a298e2a98be41d72e2'
+$checksum     = 'a1a226614b33b2a2f9021372e21f7c191d209cbd8786c5670bd5175a76055228'
 $checksumType = 'sha256'
 
 # Download installer package and verify checksum

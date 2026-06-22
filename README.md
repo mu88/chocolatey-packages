@@ -18,7 +18,7 @@ Packages in the `_auto` folder utilize Renovate to automatically check for updat
 | Package | Version | Description |
 |---------|---------|-------------|
 | **foldersync-desktop** | [![Chocolatey Version](https://img.shields.io/badge/Chocolatey-2.9.2-green)](https://chocolatey.org/packages/foldersync-desktop) | Desktop file synchronization tool |
-| **github-copilot-cli** | [![Chocolatey Version](https://img.shields.io/badge/Chocolatey-1.0.62-green)](https://chocolatey.org/packages/github-copilot-cli) | GitHub Copilot command-line interface |
+| **github-copilot-cli** | [![Chocolatey Version](https://img.shields.io/badge/Chocolatey-1.0.63-green)](https://chocolatey.org/packages/github-copilot-cli) | GitHub Copilot command-line interface |
 | **px-proxy** | [![Chocolatey Version](https://img.shields.io/badge/Chocolatey-0.11.0-green)](https://chocolatey.org/packages/px-proxy) | Proxy tool for Windows environments |
 | **token2-companion** | [![Chocolatey Version](https://img.shields.io/badge/Chocolatey-2.0.2.6-green)](https://chocolatey.org/packages/token2-companion) | Companion application for Token2 |
 

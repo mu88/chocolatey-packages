@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>golden-cheetah</id>
+    <version>3.7.1</version>
+    <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/golden-cheetah</packageSourceUrl>
+    <title>Golden Cheetah</title>
+    <owners>mu88</owners>
+    <authors>GoldenCheetah contributors</authors>
+    <projectUrl>https://www.goldencheetah.org/</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/GoldenCheetah/GoldenCheetah/master/src/Resources/win32/gc.ico</iconUrl>
+    <licenseUrl>https://github.com/GoldenCheetah/GoldenCheetah/blob/master/COPYING</licenseUrl>
+    <docsUrl>https://github.com/GoldenCheetah/GoldenCheetah/wiki</docsUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>cycling training analysis performance desktop qt</tags>
+    <summary>Performance software for cyclists and triathletes.</summary>
+    <description>Golden Cheetah is an advanced performance analysis application for cyclists and triathletes. This package installs the official Windows x64 Qt6 release from GitHub and includes the required Microsoft Visual C++ runtime dependency.</description>
+    <releaseNotes>https://github.com/GoldenCheetah/GoldenCheetah/releases</releaseNotes>
+    <dependencies>
+      <dependency id="vcredist140" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

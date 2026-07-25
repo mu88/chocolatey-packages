@@ -9,7 +9,7 @@
     <owners>mu88</owners>
     <authors>GoldenCheetah contributors</authors>
     <projectUrl>https://www.goldencheetah.org/</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/GoldenCheetah/GoldenCheetah/master/src/Resources/win32/gc.ico</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/GoldenCheetah/GoldenCheetah/master/src/Resources/images/gc.png</iconUrl>
     <licenseUrl>https://github.com/GoldenCheetah/GoldenCheetah/blob/master/COPYING</licenseUrl>
     <docsUrl>https://github.com/GoldenCheetah/GoldenCheetah/wiki</docsUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -18,7 +18,7 @@
     <description>Golden Cheetah is an advanced performance analysis application for cyclists and triathletes. This package installs the official Windows x64 Qt6 release from GitHub and includes the required Microsoft Visual C++ runtime dependency.</description>
     <releaseNotes>https://github.com/GoldenCheetah/GoldenCheetah/releases</releaseNotes>
     <dependencies>
-      <dependency id="vcredist140" />
+      <dependency id="vcredist140" version="[14.0.0,)" />
     </dependencies>
   </metadata>
   <files>

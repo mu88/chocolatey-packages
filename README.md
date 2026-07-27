@@ -17,7 +17,7 @@ Packages in the `_auto` folder utilize Renovate to automatically check for updat
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| **foldersync-desktop** | [![Chocolatey Version](https://img.shields.io/badge/Chocolatey-2.11.0-green)](https://chocolatey.org/packages/foldersync-desktop) | Desktop file synchronization tool |
+| **foldersync-desktop** | [![Chocolatey Version](https://img.shields.io/badge/Chocolatey-2.12.0-green)](https://chocolatey.org/packages/foldersync-desktop) | Desktop file synchronization tool |
 | **golden-cheetah** | [![Chocolatey Version](https://img.shields.io/badge/Chocolatey-3.7.1-green)](https://chocolatey.org/packages/golden-cheetah) | Performance software for cyclists and triathletes |
 | **github-copilot-cli** | [![Chocolatey Version](https://img.shields.io/badge/Chocolatey-1.0.75-green)](https://chocolatey.org/packages/github-copilot-cli) | GitHub Copilot command-line interface |
 | **px-proxy** | [![Chocolatey Version](https://img.shields.io/badge/Chocolatey-0.11.0-green)](https://chocolatey.org/packages/px-proxy) | Proxy tool for Windows environments |

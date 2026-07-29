@@ -1,0 +1,58 @@
+Param (
+    [string]$GitHubToken
+)
+
+Import-Module Chocolatey-AU
+
+function global:au_GetLatest {
+    $authSplat = @{}
+    if ($GitHubToken) {
+        $authSplat = @{
+            Authentication = 'Bearer'
+            Token          = ($GitHubToken | ConvertTo-SecureString -AsPlainText)
+        }
+    }
+
+    $latestRelease = Invoke-RestMethod -UseBasicParsing -Uri 'https://api.github.com/repos/google/go-containerregistry/releases/latest' @authSplat
+    $latestVersion = $latestRelease.tag_name
+
+    $windowsAsset = $latestRelease.assets |
+        Where-Object { $_.name -match '^go-containerregistry_Windows_x86_64\.tar\.gz$' } |
+        Select-Object -First 1
+
+    if (-not $windowsAsset) {
+        throw 'Could not find go-containerregistry Windows x86_64 asset in latest release.'
+    }
+
+    $assetDigest = $windowsAsset.digest
+    if (-not $assetDigest -or -not $assetDigest.StartsWith('sha256:')) {
+        throw 'Could not determine SHA256 digest for go-containerregistry Windows x86_64 asset.'
+    }
+
+    return @{
+        URL64          = $windowsAsset.browser_download_url
+        Version        = if ($latestVersion.StartsWith('v')) { $latestVersion.Substring(1) } else { $latestVersion }
+        Checksum64     = $assetDigest.Substring(7)
+        ChecksumType64 = 'sha256'
+    }
+}
+
+function global:au_SearchReplace {
+    @{
+        '.\go-containerregistry.nuspec' = @{
+            '(?i)(<version>).*?(</version>)' = "`${1}$($Latest.Version)`${2}"
+        }
+
+        '.\tools\chocolateyInstall.ps1' = @{
+            "(?i)(^\s*(\`$)url64\s*=\s*)('.*')"          = "`$1'$($Latest.URL64)'"
+            "(?i)(^\s*(\`$)checksum64\s*=\s*)('.*')"     = "`$1'$($Latest.Checksum64)'"
+            "(?i)(^\s*(\`$)checksumType64\s*=\s*)('.*')" = "`$1'$($Latest.ChecksumType64)'"
+        }
+
+        '..\..\README.md' = @{
+            "(?i)(go-containerregistry.*?Chocolatey-)(\d+\.\d+\.\d+)(-green)" = "`${1}$($Latest.Version)`${3}"
+        }
+    }
+}
+
+Update -ChecksumFor 64

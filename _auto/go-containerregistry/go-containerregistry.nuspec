@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>go-containerregistry</id>
+    <version>0.21.7</version>
+    <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/go-containerregistry</packageSourceUrl>
+    <title>go-containerregistry (crane / gcrane / krane)</title>
+    <owners>mu88</owners>
+    <authors>Google LLC</authors>
+    <projectUrl>https://github.com/google/go-containerregistry</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/google/go-containerregistry/main/images/crane.png</iconUrl>
+    <licenseUrl>https://github.com/google/go-containerregistry/blob/main/LICENSE</licenseUrl>
+    <docsUrl>https://github.com/google/go-containerregistry/blob/main/cmd/crane/README.md</docsUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>container registry crane gcrane krane oci docker image</tags>
+    <summary>CLI tools for interacting with container registries (crane, gcrane, krane).</summary>
+    <description>Installs the go-containerregistry CLI tools from the official GitHub release and exposes the crane, gcrane, and krane commands via Chocolatey shims.
+
+- **crane**: A tool for interacting with remote images and registries (push, pull, copy, tag, digest, catalog, etc.).
+- **gcrane**: A superset of crane with additional Google Container Registry-specific commands.
+- **krane**: A tool for building and pushing container images from Kubernetes manifests.
+
+All binaries come from the official Google go-containerregistry release.</description>
+    <releaseNotes>https://github.com/google/go-containerregistry/releases</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

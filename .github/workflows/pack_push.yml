@@ -10,6 +10,7 @@ on:
         - foldersync-desktop
         - golden-cheetah
         - github-copilot-cli
+        - go-containerregistry
         - px-proxy
         - token2-companion
 

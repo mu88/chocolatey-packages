@@ -12,6 +12,7 @@ on:
         options:
           - all
           - github-copilot-cli
+          - golden-cheetah
           - foldersync-desktop
           - px-proxy
           - token2-companion

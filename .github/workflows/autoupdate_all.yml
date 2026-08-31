@@ -37,6 +37,7 @@ jobs:
           $all = @(
             @{ package = 'github-copilot-cli'; testable = $true  }
             @{ package = 'foldersync-desktop'; testable = $false }
+            @{ package = 'golden-cheetah'; testable = $true }
             @{ package = 'px-proxy'; testable = $true  }
             @{ package = 'token2-companion';   testable = $true  }
           )

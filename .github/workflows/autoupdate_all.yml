@@ -3,6 +3,13 @@ name: Choco Auto Update
 on:
   schedule:
     - cron:  '0 0 * * 1' # temporarily, run less often since Chocolatey moderation/approval is currently very slow
+  push:
+    # Renovate here uses automergeType "branch": it pushes commits directly to renovate/* branches
+    # (never opens a pull request), so push - not pull_request - is the correct dry-run validation trigger.
+    branches-ignore:
+      - main
+    paths:
+      - '.github/workflows/autoupdate_all.yml'
   workflow_dispatch:
     inputs:
       package:
@@ -16,6 +23,10 @@ on:
           - foldersync-desktop
           - px-proxy
           - token2-companion
+      dry_run:
+        type: boolean
+        description: Dry run (skip publishing and pushing to main)?
+        default: false
 
 defaults:
   run:
@@ -61,6 +72,12 @@ jobs:
       id-token: write
       packages: write
       pull-requests: write
+
+    env:
+      # push (Renovate automerge branches) is always a dry run; schedule is always a real run;
+      # workflow_dispatch is real by default but can be forced into dry-run mode via the input.
+      # Note: 'permissions' cannot be scoped conditionally like this - only 'if:' step guards can.
+      DRY_RUN: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.dry_run == true) }}
 
     strategy:
       fail-fast: false
@@ -125,9 +142,11 @@ jobs:
           Write-Output "NewVersion=$($NewVersion)" >> $Env:GITHUB_OUTPUT
           Write-Output "UpdateStatus=$($UpdateStatus)" >> $Env:GITHUB_OUTPUT
 
-      - name: Pack ${{ matrix.package }} for testing (manual trigger only)
+      - name: Pack ${{ matrix.package }} for testing (manual trigger or push dry run)
         id: pack_for_test
-        if: ${{ github.event_name == 'workflow_dispatch' && matrix.testable && steps.update.outputs.UpdateStatus == 'Update Available' && steps.update.outputs.NupkgPath == '' }}
+        # Forces a test pack+install even without an actual upstream update - used for manual
+        # workflow_dispatch runs and for push dry runs (e.g. to smoke-test action version bumps).
+        if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && matrix.testable && steps.update.outputs.UpdateStatus == 'Update Available' && steps.update.outputs.NupkgPath == '' }}
         run: |
           Set-Location _auto\${{ matrix.package }}
           $PackOutput = choco pack
@@ -141,8 +160,9 @@ jobs:
           Test-Package -Install -Nu $NupkgPath
 
       - name: Publish ${{ matrix.package }} to GitHub Packages feed
-        if: steps.update.outputs.UpdateStatus == 'Update Available'
         # Skipped for 'Sync Nuspec' - version already exists in the feed
+        # Skipped on dry run - never publish real packages from an unverified Renovate branch
+        if: ${{ steps.update.outputs.UpdateStatus == 'Update Available' && env.DRY_RUN != 'true' }}
         run: |
           Set-Location _auto\${{ matrix.package }}
           $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
@@ -150,8 +170,9 @@ jobs:
           dotnet nuget push $Nupkg --api-key $ApiKey --source 'github' --skip-duplicate
   
       - name: Publish ${{ matrix.package }} to Chocolatey community feed
-        if: steps.update.outputs.UpdateStatus == 'Update Available'
         # Skipped for 'Sync Nuspec' - version already exists in the feed
+        # Skipped on dry run - never publish real packages from an unverified Renovate branch
+        if: ${{ steps.update.outputs.UpdateStatus == 'Update Available' && env.DRY_RUN != 'true' }}
         run: |
           Set-Location _auto\${{ matrix.package }}
           $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
@@ -169,7 +190,8 @@ jobs:
           }
 
       - name: Commit and push changes
-        if: steps.update.outputs.UpdateStatus == 'Update Available' || steps.update.outputs.UpdateStatus == 'Sync Nuspec'
+        # Skipped on dry run - never write nuspec/README changes to main from an unverified Renovate branch
+        if: ${{ (steps.update.outputs.UpdateStatus == 'Update Available' || steps.update.outputs.UpdateStatus == 'Sync Nuspec') && env.DRY_RUN != 'true' }}
         run: |
           git config --local user.name "${{ steps.bot-identity.outputs.name }}"
           git config --local user.email "${{ steps.bot-identity.outputs.email }}"

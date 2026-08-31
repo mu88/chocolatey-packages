@@ -13,6 +13,10 @@ on:
         - go-containerregistry
         - px-proxy
         - token2-companion
+      dry_run:
+        type: boolean
+        description: Dry run (skip publishing)?
+        default: false
 
 defaults:
   run:
@@ -59,6 +63,7 @@ jobs:
           Test-Package -Install -Nu $NupkgPath
 
       - name: Publish ${{ github.event.inputs.package }} to GitHub Packages feed
+        if: ${{ inputs.dry_run != true }}
         run: |
           Set-Location _auto\${{ github.event.inputs.package }}
           $Nupkg = '${{ steps.pack.outputs.NupkgPath }}'
@@ -66,6 +71,7 @@ jobs:
           dotnet nuget push $Nupkg --api-key $ApiKey --source 'github' --skip-duplicate
 
       - name: Publish ${{ github.event.inputs.package }} to Chocolatey community feed
+        if: ${{ inputs.dry_run != true }}
         run: |
           Set-Location _auto\${{ github.event.inputs.package }}
           $Nupkg = '${{ steps.pack.outputs.NupkgPath }}'

@@ -92,12 +92,12 @@ jobs:
           client-id: ${{ vars.MU88_BOT_APP_ID }}
           private-key: ${{ secrets.MU88_BOT_APP_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           token: ${{ steps.bot-identity.outputs.token }}
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10
 

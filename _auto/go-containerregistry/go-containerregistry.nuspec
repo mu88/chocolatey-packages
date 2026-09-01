@@ -8,7 +8,7 @@
     <owners>mu88</owners>
     <authors>Google LLC</authors>
     <projectUrl>https://github.com/google/go-containerregistry</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/google/go-containerregistry/main/images/crane.png</iconUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/google/go-containerregistry@v0.21.7/images/crane.png</iconUrl>
     <licenseUrl>https://github.com/google/go-containerregistry/blob/main/LICENSE</licenseUrl>
     <docsUrl>https://github.com/google/go-containerregistry/blob/main/cmd/crane/README.md</docsUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

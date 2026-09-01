@@ -40,7 +40,8 @@ function global:au_GetLatest {
 function global:au_SearchReplace {
     @{
         '.\go-containerregistry.nuspec' = @{
-            '(?i)(<version>).*?(</version>)' = "`${1}$($Latest.Version)`${2}"
+            '(?i)(<version>).*?(</version>)'                      = "`${1}$($Latest.Version)`${2}"
+            '(?i)(cdn\.jsdelivr\.net/gh/google/go-containerregistry@v)[\d.]+' = "`${1}$($Latest.Version)"
         }
 
         '.\tools\chocolateyInstall.ps1' = @{

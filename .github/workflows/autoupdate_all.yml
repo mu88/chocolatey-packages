@@ -19,6 +19,7 @@ on:
         options:
           - all
           - github-copilot-cli
+          - go-containerregistry
           - golden-cheetah
           - foldersync-desktop
           - px-proxy
@@ -48,6 +49,7 @@ jobs:
           $all = @(
             @{ package = 'github-copilot-cli'; testable = $true  }
             @{ package = 'foldersync-desktop'; testable = $false }
+            @{ package = 'go-containerregistry'; testable = $true }
             @{ package = 'golden-cheetah'; testable = $true }
             @{ package = 'px-proxy'; testable = $true  }
             @{ package = 'token2-companion';   testable = $true  }

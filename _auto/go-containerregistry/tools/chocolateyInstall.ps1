@@ -1,8 +1,8 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $packageName    = 'go-containerregistry'
-$url64          = 'https://github.com/google/go-containerregistry/releases/download/v0.21.7/go-containerregistry_Windows_x86_64.tar.gz'
-$checksum64     = '88a1693e8d49298f9c44c81fbca55efea8f5ab1be3c760534cfb8d932ca88baa'
+$url64          = 'https://github.com/google/go-containerregistry/releases/download/v0.22.1/go-containerregistry_Windows_x86_64.tar.gz'
+$checksum64     = '0e073ea8192c3b8442ec8aaf44d53c1050a09084669fae3a6ceb0f2026cf8b21'
 $checksumType64 = 'sha256'
 
 $installDir = Join-Path (Get-ToolsLocation) 'GoContainerRegistry'

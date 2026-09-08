@@ -2,13 +2,13 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>go-containerregistry</id>
-    <version>0.21.7</version>
+    <version>0.22.1</version>
     <packageSourceUrl>https://github.com/mu88/chocolatey-packages/tree/main/_auto/go-containerregistry</packageSourceUrl>
     <title>go-containerregistry (crane / gcrane / krane)</title>
     <owners>mu88</owners>
     <authors>Google LLC</authors>
     <projectUrl>https://github.com/google/go-containerregistry</projectUrl>
-    <iconUrl>https://cdn.jsdelivr.net/gh/google/go-containerregistry@v0.21.7/images/crane.png</iconUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/google/go-containerregistry@v0.22.1/images/crane.png</iconUrl>
     <licenseUrl>https://github.com/google/go-containerregistry/blob/main/LICENSE</licenseUrl>
     <docsUrl>https://github.com/google/go-containerregistry/blob/main/cmd/crane/README.md</docsUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

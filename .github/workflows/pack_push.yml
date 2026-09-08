@@ -35,55 +35,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+      - name: Pack, test and publish ${{ github.event.inputs.package }}
+        uses: ./.github/actions/pack-test-publish
         with:
-          dotnet-version: 10
-
-      - name: Configure GitHub Packages as NuGet source
-        run: dotnet nuget add source --username mu88 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github 'https://nuget.pkg.github.com/mu88/index.json'
-
-      - name: Install Chocolatey Automatic Package Updater Module
-        run: Install-Module -Name Chocolatey-AU -Force
-
-      - name: Build ${{ github.event.inputs.package }} Choco package
-        id: pack
-        run: |
-          Set-Location _auto\${{ github.event.inputs.package }}
-          $UpdateOutput = choco pack
-          $NupkgPath = (($UpdateOutput | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
-          Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
-          Write-Output $UpdateOutput
-          Write-Output "NupkgPath=$($NupkgPath)"
-
-      - name: Test ${{ github.event.inputs.package }} install
-        run: |
-          Set-Location _auto\${{ github.event.inputs.package }}
-          $NupkgPath = '${{ steps.pack.outputs.NupkgPath }}'
-          Test-Package -Install -Nu $NupkgPath
-
-      - name: Publish ${{ github.event.inputs.package }} to GitHub Packages feed
-        if: ${{ inputs.dry_run != true }}
-        run: |
-          Set-Location _auto\${{ github.event.inputs.package }}
-          $Nupkg = '${{ steps.pack.outputs.NupkgPath }}'
-          $ApiKey = '${{ secrets.GITHUB_TOKEN }}'
-          dotnet nuget push $Nupkg --api-key $ApiKey --source 'github' --skip-duplicate
-
-      - name: Publish ${{ github.event.inputs.package }} to Chocolatey community feed
-        if: ${{ inputs.dry_run != true }}
-        run: |
-          Set-Location _auto\${{ github.event.inputs.package }}
-          $Nupkg = '${{ steps.pack.outputs.NupkgPath }}'
-          $ApiKey = '${{ secrets.CHOCO_KEY }}'
-          $ChocoServer = 'https://push.chocolatey.org/'
-          $PSNativeCommandUseErrorActionPreference = $false
-          $Output = choco push $Nupkg --source $ChocoServer --key $ApiKey 2>&1
-          Write-Output $Output
-          if ($LASTEXITCODE -ne 0) {
-            if (($Output -join ' ') -match 'already exists') {
-              Write-Warning 'Package already exists in the Chocolatey feed, skipping.'
-            } else {
-              throw "choco push failed with exit code $LASTEXITCODE"
-            }
-          }
+          package: ${{ github.event.inputs.package }}
+          dry-run: ${{ inputs.dry_run }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          choco-key: ${{ secrets.CHOCO_KEY }}

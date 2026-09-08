@@ -1,0 +1,99 @@
+name: Pack, test and publish Chocolatey package
+description: >-
+  Packs (if no pre-built nupkg is supplied), install-tests, and publishes a Chocolatey package to
+  the GitHub Packages NuGet feed and the Chocolatey community feed. Shared by autoupdate_all.yml
+  (matrix, only when an upstream update was detected) and pack_push.yml (manual, always packs).
+
+inputs:
+  package:
+    description: Name of the package folder under _auto/ to pack/test/publish.
+    required: true
+  nupkg-path:
+    description: Path to an already-built .nupkg. If empty, this action runs 'choco pack' itself.
+    required: false
+    default: ''
+  testable:
+    description: Whether to install-test the package before publishing.
+    required: false
+    default: 'true'
+  dry-run:
+    description: If 'true', skips both publish steps.
+    required: false
+    default: 'false'
+  install-au-module:
+    description: >-
+      Whether to install the Chocolatey-AU PowerShell module. Set to 'false' when the caller
+      already installed it earlier in the same job (e.g. to run an update.ps1 detection script).
+    required: false
+    default: 'true'
+  github-token:
+    description: Token used both for the GitHub Packages NuGet source and for publishing to it.
+    required: true
+  choco-key:
+    description: API key for the Chocolatey community feed.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set up .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+      with:
+        dotnet-version: 10
+
+    - name: Configure GitHub Packages as NuGet source
+      shell: pwsh
+      run: dotnet nuget add source --username mu88 --password ${{ inputs.github-token }} --store-password-in-clear-text --name github 'https://nuget.pkg.github.com/mu88/index.json'
+
+    - name: Install Chocolatey Automatic Package Updater Module
+      if: ${{ inputs.install-au-module == 'true' }}
+      shell: pwsh
+      run: Install-Module -Name Chocolatey-AU -Force
+
+    - name: Pack ${{ inputs.package }}
+      id: pack
+      if: ${{ inputs.nupkg-path == '' }}
+      shell: pwsh
+      run: |
+        Set-Location _auto\${{ inputs.package }}
+        $PackOutput = choco pack
+        $PackedNupkgPath = (($PackOutput | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
+        Write-Output "nupkg-path=$($PackedNupkgPath)" >> $Env:GITHUB_OUTPUT
+
+    - name: Resolve nupkg path
+      id: resolve
+      shell: pwsh
+      run: |
+        $ResolvedNupkgPath = if ('${{ inputs.nupkg-path }}') { '${{ inputs.nupkg-path }}' } else { '${{ steps.pack.outputs.nupkg-path }}' }
+        Write-Output "nupkg-path=$($ResolvedNupkgPath)" >> $Env:GITHUB_OUTPUT
+
+    - name: Test ${{ inputs.package }} install
+      if: ${{ inputs.testable == 'true' }}
+      shell: pwsh
+      run: Test-Package -Install -Nu '${{ steps.resolve.outputs.nupkg-path }}'
+
+    - name: Publish ${{ inputs.package }} to GitHub Packages feed
+      if: ${{ inputs.dry-run != 'true' }}
+      shell: pwsh
+      run: |
+        Set-Location _auto\${{ inputs.package }}
+        dotnet nuget push '${{ steps.resolve.outputs.nupkg-path }}' --api-key '${{ inputs.github-token }}' --source 'github' --skip-duplicate
+
+    - name: Publish ${{ inputs.package }} to Chocolatey community feed
+      if: ${{ inputs.dry-run != 'true' }}
+      shell: pwsh
+      run: |
+        Set-Location _auto\${{ inputs.package }}
+        $Nupkg = '${{ steps.resolve.outputs.nupkg-path }}'
+        $ApiKey = '${{ inputs.choco-key }}'
+        $ChocoServer = 'https://push.chocolatey.org/'
+        $PSNativeCommandUseErrorActionPreference = $false
+        $Output = choco push $Nupkg --source $ChocoServer --key $ApiKey 2>&1
+        Write-Output $Output
+        if ($LASTEXITCODE -ne 0) {
+          if (($Output -join ' ') -match 'already exists') {
+            Write-Warning 'Package already exists in the Chocolatey feed, skipping.'
+          } else {
+            throw "choco push failed with exit code $LASTEXITCODE"
+          }
+        }

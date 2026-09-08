@@ -70,7 +70,7 @@ jobs:
 
     permissions:
       attestations: write
-      contents: write
+      contents: read
       id-token: write
       packages: write
       pull-requests: write
@@ -83,7 +83,6 @@ jobs:
 
     strategy:
       fail-fast: false
-      max-parallel: 1
       matrix: ${{ fromJson(needs.get_matrix.outputs.matrix) }}
 
     steps:
@@ -97,14 +96,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           token: ${{ steps.bot-identity.outputs.token }}
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
-        with:
-          dotnet-version: 10
-
-      - name: Configure GitHub Packages as NuGet source
-        run: dotnet nuget add source --username mu88 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github 'https://nuget.pkg.github.com/mu88/index.json'
 
       - name: Install Chocolatey Automatic Package Updater Module
         run: Install-Module -Name Chocolatey-AU -Force
@@ -155,55 +146,167 @@ jobs:
           $NupkgPath = (($PackOutput | Where-Object {$_ -like '*.nupkg''*'}) -split "'")[1]
           Write-Output "NupkgPath=$($NupkgPath)" >> $Env:GITHUB_OUTPUT
 
-      - name: Test ${{ matrix.package }} install
-        if: ${{ matrix.testable && (steps.update.outputs.NupkgPath != '' || steps.pack_for_test.conclusion == 'success') }}
-        run: |
-          $NupkgPath = if ('${{ steps.update.outputs.NupkgPath }}') { '${{ steps.update.outputs.NupkgPath }}' } else { '${{ steps.pack_for_test.outputs.NupkgPath }}' }
-          Test-Package -Install -Nu $NupkgPath
+      - name: Test and publish ${{ matrix.package }}
+        # Union of the two conditions the extracted steps used to have individually - the
+        # composite action re-applies each one internally via the testable/dry-run inputs,
+        # so within a single invocation testing and publishing can still be gated independently,
+        # exactly like the two conditions did before this was one action, e.g. a forced
+        # smoke-test pack (workflow_dispatch/push) can run the Test step without ever publishing.
+        if: ${{ (matrix.testable && (steps.update.outputs.NupkgPath != '' || steps.pack_for_test.conclusion == 'success')) || (steps.update.outputs.UpdateStatus == 'Update Available' && env.DRY_RUN != 'true') }}
+        uses: ./.github/actions/pack-test-publish
+        with:
+          package: ${{ matrix.package }}
+          nupkg-path: ${{ steps.update.outputs.NupkgPath || steps.pack_for_test.outputs.NupkgPath }}
+          testable: ${{ matrix.testable }}
+          dry-run: ${{ env.DRY_RUN }}
+          install-au-module: 'false' # already installed above to run update.ps1
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          choco-key: ${{ secrets.CHOCO_KEY }}
 
-      - name: Publish ${{ matrix.package }} to GitHub Packages feed
-        # Skipped for 'Sync Nuspec' - version already exists in the feed
-        # Skipped on dry run - never publish real packages from an unverified Renovate branch
-        if: ${{ steps.update.outputs.UpdateStatus == 'Update Available' && env.DRY_RUN != 'true' }}
-        run: |
-          Set-Location _auto\${{ matrix.package }}
-          $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
-          $ApiKey = '${{ secrets.GITHUB_TOKEN }}'
-          dotnet nuget push $Nupkg --api-key $ApiKey --source 'github' --skip-duplicate
-  
-      - name: Publish ${{ matrix.package }} to Chocolatey community feed
-        # Skipped for 'Sync Nuspec' - version already exists in the feed
-        # Skipped on dry run - never publish real packages from an unverified Renovate branch
-        if: ${{ steps.update.outputs.UpdateStatus == 'Update Available' && env.DRY_RUN != 'true' }}
-        run: |
-          Set-Location _auto\${{ matrix.package }}
-          $Nupkg = '${{ steps.update.outputs.NupkgPath }}'
-          $ApiKey = '${{ secrets.CHOCO_KEY }}'
-          $ChocoServer = 'https://push.chocolatey.org/'
-          $PSNativeCommandUseErrorActionPreference = $false
-          $Output = choco push $Nupkg --source $ChocoServer --key $ApiKey 2>&1
-          Write-Output $Output
-          if ($LASTEXITCODE -ne 0) {
-            if (($Output -join ' ') -match 'already exists') {
-              Write-Warning 'Package already exists in the Chocolatey feed, skipping.'
-            } else {
-              throw "choco push failed with exit code $LASTEXITCODE"
-            }
-          }
-
-      - name: Commit and push changes
-        # Skipped on dry run - never write nuspec/README changes to main from an unverified Renovate branch
+      - name: Prepare ${{ matrix.package }} update artifact
+        # Skipped on dry run - never hand nuspec/README changes to the commit job from an unverified Renovate branch
+        id: prepare_artifact
         if: ${{ (steps.update.outputs.UpdateStatus == 'Update Available' || steps.update.outputs.UpdateStatus == 'Sync Nuspec') && env.DRY_RUN != 'true' }}
         run: |
-          git config --local user.name "${{ steps.bot-identity.outputs.name }}"
-          git config --local user.email "${{ steps.bot-identity.outputs.email }}"
+          # Metadata travels alongside the changed package files in the same artifact, because matrix
+          # job outputs are not aggregated by GitHub Actions (only the last matrix leg's outputs survive
+          # in needs.*.outputs) - the commit_changes job can only learn what happened via the artifact.
+          $Meta = [ordered]@{
+            package    = '${{ matrix.package }}'
+            newVersion = '${{ steps.update.outputs.NewVersion }}'
+          }
+          $Meta | ConvertTo-Json | Set-Content -Path '_auto\${{ matrix.package }}\.update-meta.json'
 
-          if (-not (git status --porcelain)) {
-            Write-Warning 'Nothing to commit - nuspec is already up to date. Skipping push.'
+      - name: Upload ${{ matrix.package }} update artifact
+        if: ${{ steps.prepare_artifact.conclusion == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: update-${{ matrix.package }}
+          path: _auto/${{ matrix.package }}
+          retention-days: 1
+          if-no-files-found: error
+
+  commit_changes:
+    name: Commit and push package updates
+    needs: update_choco_auto
+    # Runs even if individual matrix legs failed (fail-fast: false), so unrelated package
+    # updates still get committed. Never runs for dry runs - those never upload artifacts,
+    # but skipping the job outright avoids an unnecessary checkout/download roundtrip.
+    if: ${{ always() && !(github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.dry_run == true)) }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Get bot user identity
+        uses: mu88/common/.github/actions/get-bot-identity@3acb6a732366cfadf93cd1a029a2ae590d6a4f16
+        id: bot-identity
+        with:
+          client-id: ${{ vars.MU88_BOT_APP_ID }}
+          private-key: ${{ secrets.MU88_BOT_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          token: ${{ steps.bot-identity.outputs.token }}
+
+      - name: Check for pending package updates
+        # Distinguishes "no package produced an update this run" (expected, nothing to do) from a
+        # real failure to reach the artifact API - continue-on-error on the download step itself
+        # would have masked both cases identically as "nothing to commit", silently dropping updates.
+        id: check
+        env:
+          GH_TOKEN: ${{ steps.bot-identity.outputs.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          $artifactNames = gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" --jq '.artifacts[].name'
+          $hasUpdates = [bool]($artifactNames | Where-Object { $_ -like 'update-*' })
+          "has_updates=$($hasUpdates.ToString().ToLower())" >> $Env:GITHUB_OUTPUT
+
+      - name: Download package update artifacts
+        if: ${{ steps.check.outputs.has_updates == 'true' }}
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: _incoming
+          pattern: update-*
+
+      - name: Apply package updates and commit
+        env:
+          BOT_NAME: ${{ steps.bot-identity.outputs.name }}
+          BOT_EMAIL: ${{ steps.bot-identity.outputs.email }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          if (-not (Test-Path '_incoming')) {
+            Write-Output 'No package update artifacts found - nothing to commit.'
             exit 0
           }
 
-          git commit -a -m "feat(${{ matrix.package }}): upgrade to v${{ steps.update.outputs.NewVersion }}"
-          git fetch origin ${{ github.event.repository.default_branch }}
-          git rebase origin/${{ github.event.repository.default_branch }}
-          git push origin ${{ github.event.repository.default_branch }}
+          git config --local user.name $env:BOT_NAME
+          git config --local user.email $env:BOT_EMAIL
+
+          # Sorted for deterministic, reproducible commit ordering across runs.
+          $incomingDirs = Get-ChildItem -Path '_incoming' -Directory -Filter 'update-*' | Sort-Object Name
+          $anyCommitted = $false
+
+          foreach ($dir in $incomingDirs) {
+            $metaPath = Join-Path $dir.FullName '.update-meta.json'
+            if (-not (Test-Path $metaPath)) {
+              Write-Warning "No metadata found in '$($dir.Name)' - skipping."
+              continue
+            }
+
+            $meta = Get-Content -Raw -Path $metaPath | ConvertFrom-Json
+            Remove-Item -Path $metaPath -Force
+
+            $targetDir = "_auto/$($meta.package)"
+            Copy-Item -Path (Join-Path $dir.FullName '*') -Destination $targetDir -Recurse -Force
+
+            if (-not (git status --porcelain -- $targetDir)) {
+              Write-Warning "No file changes for '$($meta.package)' - skipping commit."
+              continue
+            }
+
+            git add -- $targetDir
+            git commit -m "feat($($meta.package)): upgrade to v$($meta.newVersion)"
+            $anyCommitted = $true
+          }
+
+          if (-not $anyCommitted) {
+            Write-Output 'No package changes to commit.'
+            exit 0
+          }
+
+          # Regenerated once, after all package commits, from a single writer - so README.md can
+          # never conflict between packages the way per-package README patches used to.
+          ./build/Sync-ReadmeVersion.ps1
+          if (git status --porcelain -- README.md) {
+            git add README.md
+            git commit -m 'chore: sync README package versions'
+          }
+
+          # Retry-with-rebase only guards against a *different* workflow run racing this one
+          # (e.g. a manual dispatch overlapping the schedule) - within a single run, this job
+          # is the only writer to the default branch, so there is nothing to rebase away here.
+          $maxAttempts = 5
+          for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+            $PSNativeCommandUseErrorActionPreference = $false
+            git push origin "HEAD:refs/heads/$($env:DEFAULT_BRANCH)"
+            $pushExitCode = $LASTEXITCODE
+            $PSNativeCommandUseErrorActionPreference = $true
+
+            if ($pushExitCode -eq 0) { exit 0 }
+
+            if ($attempt -eq $maxAttempts) {
+              throw "Could not push to $($env:DEFAULT_BRANCH) after $maxAttempts attempts."
+            }
+
+            Write-Warning "Push attempt $attempt/$maxAttempts rejected - retrying after rebase."
+            Start-Sleep -Seconds (5 * $attempt)
+            git fetch origin $env:DEFAULT_BRANCH
+            git rebase "origin/$($env:DEFAULT_BRANCH)"
+          }

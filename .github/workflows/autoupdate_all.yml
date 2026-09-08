@@ -85,7 +85,7 @@ jobs:
 
     steps:
       - name: Get bot user identity
-        uses: mu88/common/.github/actions/get-bot-identity@3acb6a732366cfadf93cd1a029a2ae590d6a4f16
+        uses: mu88/common/.github/actions/get-bot-identity@3acb6a732366cfadf93cd1a029a2ae590d6a4f16 # main
         id: bot-identity
         with:
           client-id: ${{ vars.MU88_BOT_APP_ID }}
@@ -198,7 +198,7 @@ jobs:
 
     steps:
       - name: Get bot user identity
-        uses: mu88/common/.github/actions/get-bot-identity@3acb6a732366cfadf93cd1a029a2ae590d6a4f16
+        uses: mu88/common/.github/actions/get-bot-identity@3acb6a732366cfadf93cd1a029a2ae590d6a4f16 # main
         id: bot-identity
         with:
           client-id: ${{ vars.MU88_BOT_APP_ID }}

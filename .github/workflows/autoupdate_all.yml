@@ -40,6 +40,7 @@ concurrency:
 jobs:
   get_matrix:
     runs-on: ubuntu-latest
+    permissions: {}
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
@@ -69,11 +70,8 @@ jobs:
     runs-on: windows-latest
 
     permissions:
-      attestations: write
       contents: read
-      id-token: write
       packages: write
-      pull-requests: write
 
     env:
       # push (Renovate automerge branches) is always a dry run; schedule is always a real run;

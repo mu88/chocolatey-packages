@@ -41,14 +41,18 @@ function global:au_GetLatest {
     }
 
     $latestRelease = Invoke-RestMethod -UseBasicParsing -Uri 'https://api.github.com/repos/GoldenCheetah/GoldenCheetah/releases/latest' @authSplat
-    $windowsAsset = $latestRelease.assets |
-        Where-Object { $_.name -match '^GoldenCheetah_v.+_x64Qt6\.exe$' } |
-        Select-Object -First 1
+    $windowsAssets = @(
+        $latestRelease.assets | Where-Object {
+            $_.name -match '^GoldenCheetah_v.+_x64(?:Qt\d+)?\.exe$'
+        }
+    )
 
-    if (-not $windowsAsset) {
-        throw 'Could not find Golden Cheetah Windows x64 Qt6 installer in latest release assets.'
+    if ($windowsAssets.Count -ne 1) {
+        $availableAssets = $latestRelease.assets.name -join ', '
+        throw "Expected exactly one Golden Cheetah Windows x64 installer but found $($windowsAssets.Count). Available assets: $availableAssets"
     }
 
+    $windowsAsset = $windowsAssets[0]
     $assetDigest = $windowsAsset.digest
     if (-not $assetDigest -or -not $assetDigest.StartsWith('sha256:')) {
         throw 'Could not determine SHA256 digest for Golden Cheetah Windows installer.'

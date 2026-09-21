@@ -7,8 +7,8 @@
     currently in each package's .nuspec. Previously, every update.ps1 patched its own README badge via
     au_SearchReplace directly. When several packages were updated in the same CI run, their README
     patches touched neighboring table rows, which regularly caused merge/rebase conflicts.
-    Deriving the badges from the nuspecs in one place - after all package changes have been applied -
-    removes README.md from the set of files that can conflict between packages entirely.
+    The central commit job invokes this script immediately before each package commit. This keeps a
+    package's README badge in the same commit while retaining one writer for README.md.
 
 .PARAMETER RepositoryRoot
     Path to the repository root, i.e. the directory containing README.md and _auto/. Defaults to the

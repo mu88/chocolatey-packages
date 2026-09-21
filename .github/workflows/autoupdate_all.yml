@@ -166,6 +166,15 @@ jobs:
         id: prepare_artifact
         if: ${{ (steps.update.outputs.UpdateStatus == 'Update Available' || steps.update.outputs.UpdateStatus == 'Sync Nuspec') && env.DRY_RUN != 'true' }}
         run: |
+          $utf8WithoutBom = [System.Text.UTF8Encoding]::new($false)
+          $textFiles = Get-ChildItem -Path '_auto\${{ matrix.package }}' -File -Recurse |
+            Where-Object { $_.Extension -in '.nuspec', '.ps1' }
+          foreach ($textFile in $textFiles) {
+            $content = [System.IO.File]::ReadAllText($textFile.FullName)
+            $normalizedContent = $content -replace "`r`n", "`n"
+            [System.IO.File]::WriteAllText($textFile.FullName, $normalizedContent, $utf8WithoutBom)
+          }
+
           # Metadata travels alongside the changed package files in the same artifact, because matrix
           # job outputs are not aggregated by GitHub Actions (only the last matrix leg's outputs survive
           # in needs.*.outputs) - the commit_changes job can only learn what happened via the artifact.
@@ -173,14 +182,16 @@ jobs:
             package    = '${{ matrix.package }}'
             newVersion = '${{ steps.update.outputs.NewVersion }}'
           }
-          $Meta | ConvertTo-Json | Set-Content -Path '_auto\${{ matrix.package }}\.update-meta.json'
+          $Meta | ConvertTo-Json | Set-Content -Encoding utf8 -Path '_auto\${{ matrix.package }}\update-metadata.json'
 
       - name: Upload ${{ matrix.package }} update artifact
         if: ${{ steps.prepare_artifact.conclusion == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: update-${{ matrix.package }}
-          path: _auto/${{ matrix.package }}
+          path: |
+            _auto/${{ matrix.package }}
+            !_auto/${{ matrix.package }}/*.nupkg
           retention-days: 1
           if-no-files-found: error
 
@@ -220,8 +231,10 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
 
           $artifactNames = gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" --jq '.artifacts[].name'
-          $hasUpdates = [bool]($artifactNames | Where-Object { $_ -like 'update-*' })
+          $updateArtifacts = @($artifactNames | Where-Object { $_ -like 'update-*' })
+          $hasUpdates = $updateArtifacts.Count -gt 0
           "has_updates=$($hasUpdates.ToString().ToLower())" >> $Env:GITHUB_OUTPUT
+          "update_count=$($updateArtifacts.Count)" >> $Env:GITHUB_OUTPUT
 
       - name: Download package update artifacts
         if: ${{ steps.check.outputs.has_updates == 'true' }}
@@ -247,44 +260,54 @@ jobs:
           git config --local user.name $env:BOT_NAME
           git config --local user.email $env:BOT_EMAIL
 
-          # Sorted for deterministic, reproducible commit ordering across runs.
-          $incomingDirs = Get-ChildItem -Path '_incoming' -Directory -Filter 'update-*' | Sort-Object Name
-          $anyCommitted = $false
+          $metadataFiles = @(
+            Get-ChildItem -Path '_incoming' -Filter 'update-metadata.json' -File -Recurse |
+                Sort-Object FullName
+          )
+          $expectedUpdateCount = [int]'${{ steps.check.outputs.update_count }}'
+          if ($metadataFiles.Count -ne $expectedUpdateCount) {
+            throw "Expected metadata in $expectedUpdateCount update artifact(s), but found $($metadataFiles.Count)."
+          }
 
-          foreach ($dir in $incomingDirs) {
-            $metaPath = Join-Path $dir.FullName '.update-meta.json'
-            if (-not (Test-Path $metaPath)) {
-              Write-Warning "No metadata found in '$($dir.Name)' - skipping."
-              continue
+          $anyCommitted = $false
+          $processedPackages = @{}
+
+          foreach ($metadataFile in $metadataFiles) {
+            $meta = Get-Content -Raw -Path $metadataFile.FullName | ConvertFrom-Json
+            if (-not $meta.package -or $meta.package -notmatch '^[a-z0-9][a-z0-9-]*$') {
+              throw "Invalid package name in '$($metadataFile.FullName)'."
             }
 
-            $meta = Get-Content -Raw -Path $metaPath | ConvertFrom-Json
-            Remove-Item -Path $metaPath -Force
+            if (-not $meta.newVersion -or $meta.newVersion -notmatch '^\d+(?:\.\d+){1,3}(?:-[0-9A-Za-z.-]+)?$') {
+              throw "Invalid package version in '$($metadataFile.FullName)'."
+            }
 
             $targetDir = "_auto/$($meta.package)"
-            Copy-Item -Path (Join-Path $dir.FullName '*') -Destination $targetDir -Recurse -Force
-
-            if (-not (git status --porcelain -- $targetDir)) {
-              Write-Warning "No file changes for '$($meta.package)' - skipping commit."
-              continue
+            if (-not (Test-Path -Path $targetDir -PathType Container)) {
+              throw "Package directory '$targetDir' does not exist."
             }
 
-            git add -- $targetDir
+            if ($processedPackages.ContainsKey($meta.package)) {
+              throw "Multiple update artifacts were provided for '$($meta.package)'."
+            }
+
+            $artifactDir = $metadataFile.Directory.FullName
+            Copy-Item -Path (Join-Path $artifactDir '*') -Destination $targetDir -Recurse -Force -Exclude 'update-metadata.json', '*.nupkg'
+
+            if (-not (git status --porcelain -- $targetDir)) {
+              throw "Update artifact for '$($meta.package)' contains no source changes."
+            }
+
+            ./build/Sync-ReadmeVersion.ps1
+            git add -- $targetDir README.md
             git commit -m "feat($($meta.package)): upgrade to v$($meta.newVersion)"
             $anyCommitted = $true
+            $processedPackages[$meta.package] = $true
           }
 
           if (-not $anyCommitted) {
             Write-Output 'No package changes to commit.'
             exit 0
-          }
-
-          # Regenerated once, after all package commits, from a single writer - so README.md can
-          # never conflict between packages the way per-package README patches used to.
-          ./build/Sync-ReadmeVersion.ps1
-          if (git status --porcelain -- README.md) {
-            git add README.md
-            git commit -m 'chore: sync README package versions'
           }
 
           # Retry-with-rebase only guards against a *different* workflow run racing this one

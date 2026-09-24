@@ -38,10 +38,13 @@ function global:au_GetLatest {
 }
 
 function global:au_SearchReplace {
+    $year = (Get-Date).Year
+
     @{
         '.\go-containerregistry.nuspec' = @{
-            '(?i)(<version>).*?(</version>)'                      = "`${1}$($Latest.Version)`${2}"
-            '(?i)(cdn\.jsdelivr\.net/gh/google/go-containerregistry@v)[\d.]+' = "`${1}$($Latest.Version)"
+            '(?i)(<version>).*?(</version>)'            = "`${1}$($Latest.Version)`${2}"
+            '(?i)(cdn\.jsdelivr\.net/gh/[^@]+@v)[^/]+'  = "`${1}$($Latest.Version)"
+            "(?i)(<copyright>.*?Copyright\s+)\d{4}"     = "`${1}$year"
         }
 
         '.\tools\chocolateyInstall.ps1' = @{

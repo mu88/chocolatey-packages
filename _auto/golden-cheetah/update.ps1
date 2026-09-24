@@ -61,15 +61,20 @@ function global:au_GetLatest {
     return @{
         URL64 = $windowsAsset.browser_download_url
         Version = Convert-ToNuGetVersion -TagName $latestRelease.tag_name
+        RawTag = $latestRelease.tag_name -replace '^v', ''
         Checksum64 = $assetDigest.Substring(7)
         ChecksumType64 = 'sha256'
     }
 }
 
 function global:au_SearchReplace {
+    $year = (Get-Date).Year
+
     @{
         '.\golden-cheetah.nuspec' = @{
-            '(?i)(<version>).*?(</version>)' = "`${1}$($Latest.Version)`${2}"
+            '(?i)(<version>).*?(</version>)'            = "`${1}$($Latest.Version)`${2}"
+            '(?i)(cdn\.jsdelivr\.net/gh/[^@]+@v)[^/]+'  = "`${1}$($Latest.RawTag)"
+            "(?i)(<copyright>.*?Copyright\s+)\d{4}"     = "`${1}$year"
         }
 
         '.\tools\chocolateyInstall.ps1' = @{

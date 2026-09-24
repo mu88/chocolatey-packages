@@ -8,8 +8,9 @@
     <title>Golden Cheetah</title>
     <owners>mu88</owners>
     <authors>GoldenCheetah contributors</authors>
+    <copyright>© Copyright 2026 GoldenCheetah contributors</copyright>
     <projectUrl>https://www.goldencheetah.org/</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/GoldenCheetah/GoldenCheetah/master/src/Resources/images/gc.png</iconUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/GoldenCheetah/GoldenCheetah@v3.8/src/Resources/images/gc.png</iconUrl>
     <licenseUrl>https://github.com/GoldenCheetah/GoldenCheetah/blob/master/COPYING</licenseUrl>
     <docsUrl>https://github.com/GoldenCheetah/GoldenCheetah/wiki</docsUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

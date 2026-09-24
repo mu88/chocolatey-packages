@@ -19,8 +19,8 @@ function global:au_SearchReplace {
 
     @{
         '.\github-copilot-cli.nuspec' = @{
-            "(?i)(<version>).*?(</version>)"     = "`${1}$($Latest.Version)`${2}"
-            "(?i)(<copyright>).*?(</copyright>)" = "`${1}© Copyright $year GitHub, Inc.`${2}"
+            "(?i)(<version>).*?(</version>)"        = "`${1}$($Latest.Version)`${2}"
+            "(?i)(<copyright>.*?Copyright\s+)\d{4}" = "`${1}$year"
         }
 
         '.\tools\chocolateyInstall.ps1' = @{

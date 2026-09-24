@@ -15,7 +15,13 @@ function global:au_GetLatest {
 }
 
 function global:au_SearchReplace {
+    $year = (Get-Date).Year
+
     @{
+        '.\foldersync-desktop.nuspec' = @{
+            "(?i)(<copyright>.*?Copyright\s+)\d{4}" = "`${1}$year"
+        }
+
         '.\tools\chocolateyInstall.ps1' = @{
             "(?i)(^\s*(\$)url64\s*=\s*)('.*')"        = "`$1'$($Latest.URL64)'"
             "(?i)(^\s*(\$)checksum\s*=\s*)('.*')"     = "`$1'$($Latest.Checksum64)'"

@@ -78,8 +78,8 @@ function global:au_SearchReplace {
 
     @{
         ".\token2-companion.nuspec" = @{
-            "(?i)(<version>).*?(</version>)"     = "`${1}$($Latest.Version)`${2}"
-            "(?i)(<copyright>).*?(</copyright>)" = "`${1}© Copyright 2013 - $year TOKEN2 Sàrl`${2}"
+            "(?i)(<version>).*?(</version>)"                    = "`${1}$($Latest.Version)`${2}"
+            "(?i)(<copyright>.*?Copyright\s+\d{4}\s*-\s*)\d{4}" = "`${1}$year"
         }
 
         ".\tools\chocolateyinstall.ps1" = @{

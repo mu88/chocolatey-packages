@@ -7,6 +7,7 @@
     <title>go-containerregistry (crane / gcrane / krane)</title>
     <owners>mu88</owners>
     <authors>Google LLC</authors>
+    <copyright>© Copyright 2026 Google LLC</copyright>
     <projectUrl>https://github.com/google/go-containerregistry</projectUrl>
     <iconUrl>https://cdn.jsdelivr.net/gh/google/go-containerregistry@v0.22.1/images/crane.png</iconUrl>
     <licenseUrl>https://github.com/google/go-containerregistry/blob/main/LICENSE</licenseUrl>

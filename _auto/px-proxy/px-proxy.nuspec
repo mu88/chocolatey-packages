@@ -7,8 +7,9 @@
     <title>Px Proxy</title>
     <owners>mu88</owners>
     <authors>genotrance</authors>
+    <copyright>© Copyright 2026 genotrance</copyright>
     <projectUrl>https://github.com/genotrance/px</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/mu88/chocolatey-packages/main/_auto/px-proxy/px-proxy.png</iconUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/mu88/chocolatey-packages@main/_auto/px-proxy/px-proxy.png</iconUrl>
     <licenseUrl>https://github.com/genotrance/px/blob/master/LICENSE.txt</licenseUrl>
     <docsUrl>https://github.com/genotrance/px/blob/master/docs/configuration.md</docsUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

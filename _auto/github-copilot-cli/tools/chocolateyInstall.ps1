@@ -3,8 +3,8 @@ $ErrorActionPreference = "Stop"
 $packageName   = 'github-copilot-cli'
 $toolsDir      = Get-ToolsLocation
 $installDir    = Join-Path $toolsDir 'GitHubCopilotCLI'
-$url64         = 'https://github.com/github/copilot-cli/releases/download/v1.0.98/copilot-win32-x64.zip'
-$checksum64    = 'e264811888fd77217dc36e9656c13d0b9abbb0433a7041043e1d53798e31fd94'
+$url64         = 'https://github.com/github/copilot-cli/releases/download/v1.0.103/copilot-win32-x64.zip'
+$checksum64    = 'e63b81a1a9e2bfd3d6fbf69b6c58cc51725df30bb38654ded018f5d8a6e80a5f'
 $checksumType64 = 'sha256'
 
 $packageArgs = @{

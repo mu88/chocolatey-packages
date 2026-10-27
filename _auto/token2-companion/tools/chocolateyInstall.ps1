@@ -1,10 +1,10 @@
-﻿$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 $packageName  = 'token2-companion'
-$url          = 'https://www.token2.com/soft/Token2_Companion_App-2.0.2_R6.zip'
+$url          = 'https://www.token2.com/soft/upl/Token2CompanionAppWindows(2.0.4).zip'
 $toolsDir     = $(Split-Path -parent $MyInvocation.MyCommand.Definition)
 $installDir   = Join-Path $env:ProgramFiles 'Token2 Companion App'
-$checksum     = 'D3797E6E57BC76C4D4C1915D868CA72F03C31BB27F43BE1F09511AA92F1C2FEA'
+$checksum     = 'B45129A52089236CBD164D266D1F2F2A5F848DF0D66B9A9175C34C98BBC21137'
 $checksumType = 'sha256'
 
 # Download installer package and verify checksum

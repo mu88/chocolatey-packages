@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 
 $installDir = Join-Path $env:ProgramFiles 'Token2 Companion App'
 

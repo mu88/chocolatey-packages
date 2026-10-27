@@ -92,6 +92,11 @@ function global:au_SearchReplace {
             "(?i)(^\s*\`$checksum\s*=\s*)'.*'"     = "`$1'$($Latest.Checksum32)'"
             "(?i)(^\s*\`$checksumType\s*=\s*)'.*'" = "`$1'$($Latest.ChecksumType32)'"
         }
+
+        ".\tools\VERIFICATION.txt" = @{
+            "(?i)(^Download URL\s*:\s*).*"           = "`${1}$($Latest.URL32)"
+            "(?i)(^Checksum \(sha256\)\s*:\s*).*"     = "`${1}$($Latest.Checksum32)"
+        }
     }
 }
 

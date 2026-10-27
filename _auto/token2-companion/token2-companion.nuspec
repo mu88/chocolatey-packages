@@ -13,6 +13,9 @@
     <copyright>© Copyright 2013 - 2026 TOKEN2 Sàrl</copyright>
     <licenseUrl>https://www.token2.com/tos</licenseUrl>
     <docsUrl>https://www.token2.com/site/page/token2-companion-app-v2-user-manual</docsUrl>
+    <!-- TOKEN2 does not publish a dedicated per-version changelog; this links to the
+         download page, which only shows the current version and its last-updated date. -->
+    <releaseNotes>https://www.token2.com/pages/token2-companion-app-v2-user-manual</releaseNotes>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>fido otp passkey security</tags>
     <summary>The Token2 Companion App v2 is a desktop application for managing OTP (One-Time Password), FIDO, and PIV functionalities.</summary>

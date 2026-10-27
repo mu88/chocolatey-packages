@@ -1,0 +1,57 @@
+TOKEN2 Companion App - License Information
+===========================================
+
+This Chocolatey package downloads and installs the official TOKEN2 Companion App
+(Windows build) directly from the vendor's website at install time. See
+tools\chocolateyInstall.ps1 for the exact download URL used.
+
+The application is proprietary, closed-source software published by:
+
+  TOKEN2 Sarl
+  https://www.token2.com
+
+Per TOKEN2's Terms and Conditions (https://www.token2.com/tos), the following
+copyright notice and license terms apply:
+
+Copyright Notice
+----------------
+"All materials and software published on or used on the blog are protected by
+copyright and are owned or controlled by or licensed to Token2, or the party
+listed as the provider of the materials or software. UNAUTHORIZED COPYING,
+REPRODUCTION, REPUBLISHING, UPLOADING, POSTING, TRANSMITTING OR DUPLICATING OF
+ANY OF THE MATERIAL IS PROHIBITED. You may download any downloadable materials
+displayed on the website only for personal, non-commercial, and informational
+purposes, provided that the documents are not modified and provided you
+maintain and abide by all copyright, trademark, and other notices contained in
+such material or if none, you include the following copyright notice in such
+downloaded materials:
+
+  (c) Copyright <current year> TOKEN2 SARL. All rights reserved. All use
+  subject to Terms and Conditions of Use set forth here."
+
+Software License and Support (Clause 12, General Terms and Conditions)
+------------------------------------------------------------------------
+"The applications such as burner apps as well as other tools or digital assets
+such as CSV files or similar files containing the token seeds are subject to
+license and support fees and can only be used if a hardware product is
+purchased from Token2.com (or its authorized resellers and partners). The
+license and support fees are included in the price shown on our website."
+
+Reverse Engineering Restriction (Clause 13)
+--------------------------------------------
+"The Purchaser shall not modify, translate, reverse engineer, decompile,
+disassemble, or otherwise dismantle or deconstruct the Token2 devices,
+products, software, or documentation or otherwise attempt to discover its
+underlying code, structure, implementation, or algorithms."
+
+Full Terms and Conditions: https://www.token2.com/tos
+
+Distribution Note
+------------------
+This Chocolatey package is maintained independently by the package author
+(mu88) and is not published by TOKEN2 Sarl. The package does not embed the
+vendor binary; it only automates the download of the publicly available,
+official installer from the vendor's own website (no login or special access
+required) and verifies its integrity via a SHA256 checksum before
+installation. No additional rights beyond what TOKEN2 already grants via its
+public download page are claimed or conferred by this package.

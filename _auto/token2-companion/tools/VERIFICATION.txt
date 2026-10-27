@@ -1,0 +1,34 @@
+VERIFICATION
+============
+
+Verification is intended to assist the Chocolatey moderators and community
+in verifying that this package's contents are trustworthy.
+
+Package: token2-companion
+
+This package downloads the installer from the official TOKEN2 website at
+install time; it does not embed the binary.
+
+Download URL   : https://www.token2.com/soft/upl/Token2CompanionAppWindows(2.0.4).zip
+
+This URL is the exact download link published by the vendor on the official
+Companion App user manual / download page:
+  https://www.token2.com/pages/token2-companion-app-v2-user-manual
+  (see the "Get the Companion App" > "Desktop" > "Windows" section)
+
+Checksum type  : sha256
+Checksum (sha256): B45129A52089236CBD164D266D1F2F2A5F848DF0D66B9A9175C34C98BBC21137
+
+To verify manually:
+1. Download the file from the URL above.
+2. Run the following in PowerShell:
+     Get-FileHash '<path-to-downloaded-file>' -Algorithm SHA256
+3. Compare the resulting hash to the checksum listed above and in
+   tools\chocolateyInstall.ps1. They must match exactly.
+
+Note: the Download URL and Checksum (sha256) values above are kept in sync
+with tools\chocolateyInstall.ps1 automatically by update.ps1 (au_SearchReplace)
+on every version bump.
+
+No further signatures (e.g. Authenticode) are published by the vendor for
+this download at this time.

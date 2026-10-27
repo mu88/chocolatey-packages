@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 import-module Chocolatey-AU
 
 # Page containing download links
-$releases = 'https://www.token2.com/site/page/token2-companion-app-v2-user-manual'
+$releases = 'https://www.token2.com/pages/token2-companion-app-v2-user-manual'
 
 function Convert-ToNuGetVersion($version) {
 
@@ -28,41 +28,46 @@ function Get-VersionObject($version) {
     [version](Convert-ToNuGetVersion $version)
 }
 
-function global:au_GetLatest {
-
-    # Download page content
-    $page = Invoke-WebRequest -Uri $releases -UseBasicParsing
-
-    # Find ALL matching download links
-    $regex = '/soft/Token2_Companion_App-(?<version>[\d\._R]+)\.zip'
-
-    $regexMatches = [regex]::Matches($page.Content, $regex)
-
-    if ($regexMatches.Count -eq 0) {
-        throw "No download links found."
-    }
-
-    # Collect all versions
-    $versions = foreach ($m in $regexMatches) {
-        $raw = $m.Groups['version'].Value
-
+function Get-DownloadCandidate($href) {
+    if ([string]::IsNullOrWhiteSpace($href)) { return }
+    $downloadUri = [uri]::new([uri]$releases, [System.Net.WebUtility]::HtmlDecode($href))
+    if ($downloadUri.Scheme -ne 'https' -or $downloadUri.Host -ne ([uri]$releases).Host) { return }
+    $versionPattern = '\d+\.\d+\.\d+(?:_R\d+)?'
+    $pathPattern = "^/soft/(?:Token2_Companion_App-(?<version>$versionPattern)|upl/Token2CompanionAppWindows\((?<version>$versionPattern)\))\.zip$"
+    if ([uri]::UnescapeDataString($downloadUri.AbsolutePath) -cmatch $pathPattern) {
+        $rawVersion = $Matches.version
         [PSCustomObject]@{
-            RawVersion   = $raw
-            NuGetVersion = Convert-ToNuGetVersion $raw
-            VersionObj   = Get-VersionObject $raw
+            RawVersion   = $rawVersion
+            NuGetVersion = Convert-ToNuGetVersion $rawVersion
+            VersionObj   = Get-VersionObject $rawVersion
+            Url          = $downloadUri.AbsoluteUri
         }
     }
+}
 
-    # Select highest version
-    $latest = $versions |
+function Get-LatestDownload($candidates) {
+    $latest = $candidates |
         Sort-Object VersionObj -Descending |
         Select-Object -First 1
+    $latestDownloads = @($candidates |
+        Where-Object { $_.VersionObj -eq $latest.VersionObj } |
+        Sort-Object Url -Unique)
+    if ($latestDownloads.Count -ne 1) {
+        throw "Ambiguous Windows downloads for version $($latest.NuGetVersion): $($latestDownloads.Url -join ', ')"
+    }
+    return $latestDownloads[0]
+}
 
-    $url = "https://www.token2.com/soft/Token2_Companion_App-$($latest.RawVersion).zip"
-
+function global:au_GetLatest {
+    $page = Invoke-WebRequest -Uri $releases -UseBasicParsing
+    $candidates = @($page.Links | ForEach-Object { Get-DownloadCandidate $_.href })
+    if ($candidates.Count -eq 0) {
+        throw "No Windows download links found at $releases (HTTP $($page.StatusCode)); expected a versioned Token2 Companion App ZIP."
+    }
+    $latest = Get-LatestDownload $candidates
     return @{
         Version       = $latest.NuGetVersion
-        URL32         = $url
+        URL32         = $latest.Url
         PackageSource = $latest.RawVersion
     }
 }

@@ -93,6 +93,7 @@ function global:au_SearchReplace {
             "(?i)(^\s*\`$checksumType\s*=\s*)'.*'" = "`$1'$($Latest.ChecksumType32)'"
         }
 
+        # In case you're wondering, refer to this discussion: https://community.chocolatey.org/packages/token2-companion/2.0.4
         ".\tools\VERIFICATION.txt" = @{
             "(?i)(^Download URL\s*:\s*).*"           = "`${1}$($Latest.URL32)"
             "(?i)(^Checksum \(sha256\)\s*:\s*).*"     = "`${1}$($Latest.Checksum32)"

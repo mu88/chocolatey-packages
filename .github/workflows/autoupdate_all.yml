@@ -85,7 +85,7 @@ jobs:
 
     steps:
       - name: Get bot user identity
-        uses: mu88/common/.github/actions/get-bot-identity@74c30dc7c3e8ea56e563531f9ffae7bb6e0ad88e # main
+        uses: mu88/common/.github/actions/get-bot-identity@b59f07c7b4960c593d0f9c4a741ff91a357edd44 # main
         id: bot-identity
         with:
           client-id: ${{ vars.MU88_BOT_APP_ID }}
@@ -186,7 +186,7 @@ jobs:
 
       - name: Upload ${{ matrix.package }} update artifact
         if: ${{ steps.prepare_artifact.conclusion == 'success' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: update-${{ matrix.package }}
           path: |
@@ -209,7 +209,7 @@ jobs:
 
     steps:
       - name: Get bot user identity
-        uses: mu88/common/.github/actions/get-bot-identity@74c30dc7c3e8ea56e563531f9ffae7bb6e0ad88e # main
+        uses: mu88/common/.github/actions/get-bot-identity@b59f07c7b4960c593d0f9c4a741ff91a357edd44 # main
         id: bot-identity
         with:
           client-id: ${{ vars.MU88_BOT_APP_ID }}
@@ -238,7 +238,7 @@ jobs:
 
       - name: Download package update artifacts
         if: ${{ steps.check.outputs.has_updates == 'true' }}
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: _incoming
           pattern: update-*

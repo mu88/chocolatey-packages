@@ -11,6 +11,7 @@ on:
         - golden-cheetah
         - github-copilot-cli
         - go-containerregistry
+        - opencode2
         - px-proxy
         - token2-companion
       dry_run:

@@ -42,7 +42,6 @@ function global:au_SearchReplace {
 
     @{
         '.\go-containerregistry.nuspec' = @{
-            '(?i)(<version>).*?(</version>)'            = "`${1}$($Latest.Version)`${2}"
             '(?i)(cdn\.jsdelivr\.net/gh/[^@]+@v)[^/]+'  = "`${1}$($Latest.Version)"
             "(?i)(<copyright>.*?Copyright\s+)\d{4}"     = "`${1}$year"
         }

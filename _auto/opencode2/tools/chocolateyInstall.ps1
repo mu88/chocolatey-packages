@@ -15,6 +15,7 @@ if ($architecture -ne 'AMD64') {
 
 $installDir = Join-Path (Get-ToolsLocation) 'OpenCode2'
 $executablePath = Join-Path $installDir 'opencode.exe'
+$addOpenCodeShim = (Get-PackageParameters)['AddOpenCodeShim'] -eq $true
 
 Install-ChocolateyZipPackage -PackageName $packageName -UnzipLocation $installDir -Url64bit $url64 -Checksum64 $checksum64 -ChecksumType64 $checksumType64
 
@@ -23,3 +24,7 @@ if (-not (Test-Path -LiteralPath $executablePath -PathType Leaf)) {
 }
 
 Install-BinFile -Name 'opencode2' -Path $executablePath
+if ($addOpenCodeShim) {
+    Install-BinFile -Name 'opencode' -Path $executablePath
+    New-Item -ItemType File -Path (Join-Path $installDir 'opencode-shim.installed') -Force | Out-Null
+}

@@ -15,7 +15,10 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>opencode ai coding agent cli</tags>
     <summary>OpenCode 2 is an open-source AI coding agent.</summary>
-    <description>Installs the official OpenCode 2 Windows x64 release and exposes it as opencode2. The package does not create or remove the opencode command.
+    <description>Installs the official OpenCode 2 Windows x64 release and exposes it as opencode2.
+
+Package parameters:
+- /AddOpenCodeShim: Also expose OpenCode 2 as opencode. The parameter is optional and disabled by default; /AddOpenCodeShim:false is also accepted. This replaces any existing opencode shim, including OpenCode 1. A previously created shim remains across upgrades and is removed when this package is uninstalled.
 
 Separate commands do not isolate user data: OpenCode 1 and 2 share configuration locations, and OpenCode 2 can migrate terminal settings to cli.json on first launch. The OpenCode project recommends removing a package-managed V1 installation before installing V2. Back up your V1 setup and read https://opencode.ai/v2/docs/migrate-v1 before migrating.
 

@@ -22,6 +22,7 @@ on:
           - go-containerregistry
           - golden-cheetah
           - foldersync-desktop
+          - opencode2
           - px-proxy
           - token2-companion
       dry_run:
@@ -52,8 +53,9 @@ jobs:
             @{ package = 'foldersync-desktop'; testable = $false }
             @{ package = 'go-containerregistry'; testable = $true }
             @{ package = 'golden-cheetah'; testable = $true }
-            @{ package = 'px-proxy'; testable = $true  }
-            @{ package = 'token2-companion';   testable = $true  }
+            @{ package = 'opencode2'; testable = $true }
+            @{ package = 'px-proxy'; testable = $true }
+            @{ package = 'token2-companion'; testable = $true }
           )
           $inputPackage = if ('${{ github.event_name }}' -eq 'workflow_dispatch') { '${{ inputs.package }}' } else { 'all' }
           $filtered = if (-not $inputPackage -or $inputPackage -eq 'all') {

@@ -1,8 +1,8 @@
 $ErrorActionPreference = 'Stop'
 
 $packageName = 'opencode2'
-$url64 = 'https://github.com/anomalyco/opencode/releases/download/v2.2.5/opencode-windows-x64.zip'
-$checksum64 = '2f3bfd6b3527c60c2a882557b20ddc9ba6bdff4b5a8fe61c853da8fcfb3076e8'
+$url64 = 'https://github.com/anomalyco/opencode/releases/download/v2.2.7/opencode-windows-x64.zip'
+$checksum64 = '91398e0e2c2bc72f6c93dbdae426a0710884ed3277a08558200753c7a995daa8'
 $checksumType64 = 'sha256'
 
 $architecture = $env:PROCESSOR_ARCHITEW6432
